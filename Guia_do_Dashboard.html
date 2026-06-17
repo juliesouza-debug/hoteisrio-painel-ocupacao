@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia rápido — Painel Hotéis × Temporada</title>
+<style>
+  body{font-family:"Segoe UI",system-ui,Arial,sans-serif;color:#0f1d33;line-height:1.5;
+       max-width:820px;margin:0 auto;padding:32px 28px;background:#fff;font-size:14.5px}
+  h1{font-size:23px;margin:0 0 2px}
+  .sub{color:#5b6b85;margin:0 0 20px}
+  h2{font-size:16px;margin:22px 0 6px;padding-bottom:4px;border-bottom:2px solid #e5eaf2}
+  .dot{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:middle}
+  .h{background:#2563eb}.s{background:#f97316}
+  table{border-collapse:collapse;width:100%;margin:8px 0;font-size:13.5px}
+  th,td{border:1px solid #e5eaf2;padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:#f4f6fb}
+  .term{font-weight:700;color:#16335f}
+  .box{background:#f4f6fb;border-radius:10px;padding:12px 16px;margin:10px 0}
+  .warn{background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12;border-radius:10px;padding:12px 16px;margin:14px 0}
+  ul{margin:6px 0 6px 0;padding-left:22px}
+  li{margin:3px 0}
+  code{background:#eef2f8;padding:1px 6px;border-radius:5px;font-size:13px}
+  @media print{body{padding:0}.warn{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style></head>
+<body>
+<div style="display:flex;align-items:center;gap:14px;border-bottom:3px solid #f97316;padding-bottom:14px;margin-bottom:18px"><img class="guia-logo" src="data:image/png;base64,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" alt="HotéisRIO" style="height:58px;width:auto"><div style="font-size:12px;color:#5b6b85;line-height:1.3"><b style="color:#16335f;font-size:13px">Sindicato de Hotéis e Meios de Hospedagem</b><br>do Município do Rio de Janeiro</div></div>
+
+<h1>Guia rápido — Painel Hotéis × Aluguel de Temporada</h1>
+<p class="sub">Como usar os filtros e interpretar os gráficos · Rio de Janeiro</p>
+
+<p>Abra o arquivo <code>Dashboard_Hotel_vs_Temporada.html</code> com duplo clique (ele abre no
+navegador, ex.: Edge ou Chrome). É preciso estar conectado à internet na primeira abertura,
+pois os gráficos usam uma biblioteca online.</p>
+
+<div class="box">
+  <b>As duas cores que você verá em todo o painel:</b><br>
+  <span class="dot h"></span> <b>Azul = Hotéis</b> (rede hoteleira tradicional, fonte HotéisRIO) &nbsp;·&nbsp;
+  <span class="dot s"></span> <b>Laranja = Temporada</b> (Airbnb e similares, fonte AirDNA)
+</div>
+
+<h2>As 4 abas do painel</h2>
+<table>
+<tr><th>Aba</th><th>Para que serve</th></tr>
+<tr><td><b>Visão Geral</b></td><td>Resumo do período em duas linhas de cartões — <b>Hotéis</b> (azul) e <b>Temporada</b> (laranja), cada uma com Inventário, Ocupação, Diária Média e Receita por Quarto — mais a linha de ocupação comparativa.</td></tr>
+<tr><td><b>Comparativo Ano a Ano</b></td><td>Compara o mesmo mês entre anos diferentes (ex.: janeiro de 2023, 2024 e 2025 lado a lado).</td></tr>
+<tr><td><b>Evolução Mensal</b></td><td>A tendência ao longo do tempo, mês a mês — boa para enxergar alta e baixa temporada.</td></tr>
+<tr><td><b>Hotel × Temporada por Região</b></td><td>Compara o desempenho de cada região (Copacabana, Ipanema, Centro, etc.).</td></tr>
+</table>
+
+<h2>Como usar os filtros</h2>
+<ul>
+  <li><b>Período (De / Até):</b> na aba <i>Visão Geral</i> escolha o mês inicial e o final. <b>Esse período é compartilhado</b> com as abas <i>Evolução Mensal</i> e <i>por Região</i> — assim você nunca perde o contexto.</li>
+  <li><b>Atalhos de período:</b> botões prontos (“Últimos 3 anos”, “2025”, “Tudo”…) para trocar rápido.</li>
+  <li><b>Região:</b> escolha uma região específica ou “Rio de Janeiro (cidade)” para ver o total.</li>
+  <li><b>Anos a comparar:</b> na aba Ano a Ano, marque até 3 anos.</li>
+  <li><b>Dica:</b> passe o mouse sobre qualquer ponto, barra ou cartão — aparece o valor exato e uma explicação.</li>
+</ul>
+
+<h2>O que cada indicador significa</h2>
+<table>
+<tr><th>Termo</th><th>Em linguagem simples</th></tr>
+<tr><td class="term">Inventário</td><td>O tamanho da oferta. Nos hotéis = total de <b>quartos (UHs)</b> da rede. Na temporada = <b>quantidade de imóveis</b> que tiveram reservas, em média por mês.</td></tr>
+<tr><td class="term">Taxa de Ocupação (%)</td><td>De cada 100 quartos/imóveis disponíveis, quantos foram efetivamente alugados. Quanto maior, mais cheio.</td></tr>
+<tr><td class="term">Diária Média (ADR)</td><td>Valor médio cobrado por uma noite alugada (em R$).</td></tr>
+<tr><td class="term">Receita por Quarto (RevPAR)</td><td>Receita média por quarto disponível — considerando ocupados e vazios. É o melhor termômetro de faturamento, pois junta ocupação e preço.</td></tr>
+</table>
+
+<div class="warn">
+  <b>Importante sobre os dados:</b> a pesquisa de hotelaria registra <b>apenas a taxa de ocupação</b>.
+  Por isso, <b>Diária Média e Receita por Quarto aparecem somente para a Temporada</b> (cartões laranja);
+  nos hotéis esses dois indicadores aparecem como “Não disponível”.<br>
+  Os dados de Temporada começam em <b>maio/2023</b>; os de hotelaria, em <b>2018</b>. Onde uma linha
+  não tem dados, ela simplesmente não aparece naquele trecho.
+</div>
+
+<div class="warn" style="background:#eff5ff;border-color:#d3e3fb;color:#1e40af">
+  <b>Observação sobre o inventário:</b> a hotelaria trabalha apenas com a disponibilização de
+  <b>quartos (UHs) duplos</b>; já no aluguel de temporada (Airbnb) um único imóvel pode chegar a
+  <b>mais de 6 quartos (UHs)</b>. Por isso o inventário das duas fontes <b>não é diretamente comparável</b>:
+  os hotéis contam <b>quartos</b>, enquanto a temporada conta <b>imóveis</b>.
+</div>
+
+<h2>Como ler cada gráfico</h2>
+<ul>
+  <li><b>Linha de ocupação (Visão Geral / Evolução):</b> linha azul acima da laranja = hotéis mais cheios que a temporada naquele mês. Subidas e descidas que se repetem todo ano = sazonalidade.</li>
+  <li><b>Barras Ano a Ano:</b> cada grupo é um mês; cada cor é um ano. Compare a altura das barras do mesmo mês para ver se melhorou ou piorou de um ano para o outro. No filtro <b>Fonte</b>, escolha <b>“Ambos”</b> para ver Hotéis (tons de azul) e Temporada (tons de laranja) lado a lado no mesmo gráfico — comparação direta entre os dois mercados.</li>
+  <li><b>Barras por Região:</b> azul × laranja lado a lado em cada região — mostra onde o hotel está mais forte que a temporada e vice-versa.</li>
+  <li><b>Bolhas (Ocupação × Diária):</b> cada bolha é uma região da Temporada. Mais à <b>direita</b> = mais cheia; mais <b>alta</b> = diária mais cara; <b>bolha maior</b> = maior receita por quarto. O ideal é estar no canto superior direito.</li>
+</ul>
+
+<h2>Quando chegarem dados novos</h2>
+<p>Para atualizar o painel com novos meses, basta substituir/atualizar os arquivos de origem
+(o Excel de hotéis e as pastas do AirDNA) e rodar o script <code>Atualizar_dashboard.py</code>
+na pasta. Ele relê tudo e regenera o <code>Dashboard_Hotel_vs_Temporada.html</code> automaticamente.</p>
+
+</body></html>

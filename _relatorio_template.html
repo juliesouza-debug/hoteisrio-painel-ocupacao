@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório · Impacto do Aluguel de Temporada sobre a Hotelaria — Rio de Janeiro</title>
+<style>
+  :root{--hotel:#2563eb;--str:#f97316;--ink:#0f1d33;--muted:#5b6b85;--line:#e5eaf2}
+  *{box-sizing:border-box}
+  body{font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;color:var(--ink);
+       line-height:1.62;max-width:880px;margin:0 auto;padding:0 30px 70px;background:#fff;font-size:15px}
+  header.rep{background:linear-gradient(120deg,#0f1d33,#16335f);color:#fff;margin:0 -30px 26px;
+       padding:26px 30px 22px;border-bottom:3px solid var(--str)}
+  header.rep img{height:50px;margin-bottom:14px;display:block}
+  header.rep h1{margin:0;font-size:23px;line-height:1.25}
+  header.rep .meta{color:#b9c6df;font-size:13px;margin-top:8px}
+  h2{font-size:18px;margin:30px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--line);
+     display:flex;align-items:center;gap:9px}
+  h2 .n{background:var(--hotel);color:#fff;width:25px;height:25px;border-radius:50%;
+     display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none}
+  h3{font-size:15.5px;margin:18px 0 4px}
+  p{margin:8px 0}
+  .lead{font-size:15.5px;color:#1f2d44}
+  ul{margin:8px 0;padding-left:22px}li{margin:5px 0}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  th{background:#f4f6fb;font-size:12.5px;text-transform:uppercase;letter-spacing:.3px;color:var(--muted)}
+  tr.tot td{font-weight:700;background:#fafbfe}
+  .exec{background:#f4f6fb;border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:6px 0 8px}
+  .exec h2{margin-top:0;border:0;padding:0}
+  .callout{border-radius:12px;padding:14px 18px;margin:12px 0}
+  .neg{background:#fef2f2;border:1px solid #fecaca}
+  .pos{background:#f0fdf4;border:1px solid #bbf7d0}
+  .neu{background:#eff5ff;border:1px solid #d3e3fb}
+  .callout h3{margin-top:0}
+  .tag{font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:.4px}
+  .tag.h{background:#dbe6ff;color:var(--hotel)}.tag.s{background:#ffedd5;color:#c2410c}
+  .big{font-size:27px;font-weight:800;letter-spacing:-.5px}
+  .stat-row{display:flex;flex-wrap:wrap;gap:14px;margin:14px 0}
+  .stat{flex:1;min-width:150px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat .v{font-size:24px;font-weight:800;letter-spacing:-.5px}
+  .stat.h .v{color:var(--hotel)}.stat.s .v{color:var(--str)}
+  .stat .l{font-size:12px;color:var(--muted);margin-top:3px}
+  .src{color:var(--muted);font-size:12.5px;font-style:italic}
+  footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+  @media print{body{font-size:12.5px;padding:0 8px}header.rep{margin:0 0 18px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+     .callout,.exec,th,tr.tot td{-webkit-print-color-adjust:exact;print-color-adjust:exact}h2{break-after:avoid}
+     table,.callout,.exec{break-inside:avoid}}
+</style></head>
+<body>
+<header class="rep">
+  <img src="__LOGO__" alt="HotéisRIO">
+  <h1>Impacto do Aluguel de Temporada sobre a Hotelaria</h1>
+  <div class="meta">Cidade do Rio de Janeiro · Análise do triênio 2023–2025 · Fontes: pesquisa de ocupação HotéisRIO &amp; AirDNA<br>
+  Documento de apoio técnico · Junho/2026</div>
+</header>
+
+<div class="exec">
+  <h2>Resumo executivo</h2>
+  <p class="lead">Entre 2023 e 2025, o aluguel de temporada (Airbnb e plataformas similares) consolidou-se como uma
+  <b>oferta paralela de hospedagem de porte equivalente ao da hotelaria</b> no Rio de Janeiro. Ainda assim, os dados
+  mostram um quadro mais de <b>coexistência em um mercado em expansão</b> do que de substituição direta:</p>
+  <ul>
+    <li>O número de imóveis de temporada com reservas <b>cresceu 74%</b> em dois anos (de ~16,9 mil para ~29,5 mil/mês),
+        aproximando-se das <b>31.644 UHs (quartos) da hotelaria</b>.</li>
+    <li>Mesmo com essa explosão de oferta, a <b>ocupação dos hotéis subiu</b> (de 71,1% para 77,7%) e a <b>vantagem
+        sobre a temporada aumentou</b> — de 9,9 para 17,6 pontos percentuais. No agregado da cidade, não há sinal de
+        canibalização da ocupação hoteleira.</li>
+    <li>A pressão competitiva é <b>concentrada e sazonal</b>: forte em bairros residenciais (Ipanema/Leblon, Copacabana)
+        e nos picos de eventos (Réveillon, Carnaval), quando a temporada pratica diárias elevadas (até R$ 613).</li>
+  </ul>
+</div>
+
+<h2><span class="n">1</span> O tamanho do fenômeno</h2>
+<p>A oferta de temporada deixou de ser marginal. Em volume, já rivaliza com a hotelaria tradicional na cidade —
+embora as unidades não sejam diretamente comparáveis (ver observação ao final).</p>
+<div class="stat-row">
+  <div class="stat h"><div class="v">31.644</div><div class="l">quartos (UHs) em 286 hotéis</div></div>
+  <div class="stat s"><div class="v">~29.482</div><div class="l">imóveis de temporada c/ reservas (méd. 2025/mês)</div></div>
+  <div class="stat s"><div class="v">+74%</div><div class="l">crescimento da oferta de temporada 2023→2025</div></div>
+</div>
+<p>O ritmo de expansão é o dado mais expressivo: enquanto o parque hoteleiro é praticamente estável, a temporada
+<b>adicionou mais de 12 mil imóveis ativos em dois anos</b>. Isso amplia a capacidade total de hospedagem da cidade,
+mas também intensifica a disputa por demanda em determinados segmentos.</p>
+
+<h2><span class="n">2</span> Impactos negativos para a hotelaria</h2>
+
+<div class="callout neg">
+  <h3>2.1 · Oferta concorrente de grande escala e crescimento acelerado</h3>
+  <p>A temporada constitui hoje um estoque de hospedagem de porte semelhante ao hoteleiro, com expansão muito mais
+  rápida. Essa oferta adicional <b>limita o poder de elevação de preços e de ocupação</b> da hotelaria, sobretudo
+  porque cresce sem o mesmo nível de exigências regulatórias, tributárias e de segurança aplicadas aos hotéis
+  (assimetria competitiva — fator de contexto, não medido nesta base).</p>
+</div>
+
+<div class="callout neg">
+  <h3>2.2 · Penetração elevada em bairros-chave</h3>
+  <p>Onde o hóspede de lazer se concentra, a temporada já <b>supera a hotelaria em número de unidades</b>:</p>
+  <table>
+    <tr><th>Região</th><th>Hotéis</th><th>UHs (quartos)</th><th>Imóveis temporada*</th><th>Temporada ÷ UHs</th></tr>
+    <tr><td>Ipanema / Leblon</td><td>18</td><td>1.372</td><td>4.278</td><td>3,1×</td></tr>
+    <tr><td>Leme / Copacabana</td><td>87</td><td>10.970</td><td>11.066</td><td>1,0×</td></tr>
+    <tr><td>Centro</td><td>71</td><td>5.940</td><td>4.572</td><td>0,8×</td></tr>
+    <tr><td>São Conrado / Barra / Recreio</td><td>44</td><td>8.390</td><td>3.666</td><td>0,4×</td></tr>
+    <tr><td>Flamengo / Botafogo</td><td>66</td><td>4.972</td><td>2.046</td><td>0,4×</td></tr>
+    <tr class="tot"><td>Cidade</td><td>286</td><td>31.644</td><td>29.482</td><td>0,9×</td></tr>
+  </table>
+  <p class="src">*Média mensal de imóveis com reservas em 2025. Em Ipanema/Leblon, há mais de três imóveis de
+  temporada para cada quarto de hotel — o segmento de maior pressão sobre a hotelaria de lazer premium.</p>
+</div>
+
+<div class="callout neg">
+  <h3>2.3 · Disputa agressiva nos picos de alta demanda</h3>
+  <p>É justamente nos eventos em que a hotelaria historicamente faz sua melhor margem (Réveillon, Carnaval, verão)
+  que a temporada pratica suas <b>diárias mais altas</b> e amplia oferta — capturando parte do prêmio de preço do
+  período. A diária média da temporada saltou de ~R$ 500 (dez) para <b>R$ 613 em fevereiro/2026</b> (Carnaval),
+  contra ~R$ 375 na baixa estação. Essa oferta extra no pico <b>reduz a escassez</b> que sustentaria tarifas
+  hoteleiras ainda maiores nessas datas.</p>
+</div>
+
+<h2><span class="n">3</span> Impactos positivos e fatores de resiliência</h2>
+
+<div class="callout pos">
+  <h3>3.1 · Sem canibalização agregada: o mercado cresceu para os dois</h3>
+  <p>O dado central: apesar do salto de 74% na oferta de temporada, <b>a ocupação dos hotéis não caiu — subiu</b>.
+  A diferença a favor da hotelaria quase dobrou no período.</p>
+  <table>
+    <tr><th>Ocupação média</th><th>2023</th><th>2024</th><th>2025</th></tr>
+    <tr><td><span class="tag h">Hotéis</span></td><td>71,1%</td><td>73,2%</td><td>77,7%</td></tr>
+    <tr><td><span class="tag s">Temporada</span></td><td>61,2%</td><td>56,9%</td><td>60,1%</td></tr>
+    <tr class="tot"><td>Vantagem da hotelaria</td><td>+9,9 pp</td><td>+16,3 pp</td><td>+17,6 pp</td></tr>
+  </table>
+  <p>A leitura mais consistente é de <b>expansão da demanda total</b> pelo destino Rio (retomada do turismo,
+  calendário de grandes eventos), absorvida pelas duas modalidades — e não de uma simples transferência de hóspedes
+  do hotel para o Airbnb.</p>
+</div>
+
+<div class="callout pos">
+  <h3>3.2 · A hotelaria ocupa mais e com mais estabilidade</h3>
+  <p>Os hotéis mantêm ocupação <b>estruturalmente mais alta</b> que a temporada e <b>menos volátil</b> ao longo do ano
+  (amplitude sazonal de 19 pontos em 2025, contra 26 pontos da temporada). Isso reflete vantagens duráveis da
+  hotelaria — demanda corporativa e de eventos, padronização, segurança, serviços e previsibilidade — que a temporada
+  não substitui. A temporada é mais dependente do lazer e sofre mais na baixa estação.</p>
+</div>
+
+<div class="callout pos">
+  <h3>3.3 · Absorção de excedente em megaeventos protege o destino</h3>
+  <p>Em datas de pico (Réveillon, Carnaval, Rock in Rio), a demanda supera a capacidade hoteleira. A temporada
+  <b>absorve o transbordo</b>, evitando que o Rio “venda esgotado” e tenha de recusar visitantes — o que preserva a
+  imagem do destino e o fluxo de turistas que também consomem na rede hoteleira em outras ocasiões.</p>
+</div>
+
+<div class="callout pos">
+  <h3>3.4 · Validação de patamares de diária mais altos</h3>
+  <p>A temporada sustenta diárias médias elevadas e crescentes (de R$ 361 em 2023 para R$ 438 em 2025; RevPAR de
+  R$ 221 para R$ 264). Um mercado disposto a pagar mais por hospedagem <b>ancora para cima</b> a percepção de preço
+  da cidade, abrindo espaço para a hotelaria recompor tarifas.</p>
+</div>
+
+<h2><span class="n">4</span> Leitura por região (síntese)</h2>
+<ul>
+  <li><b>Ipanema / Leblon</b> — maior pressão competitiva: temporada 3× o nº de quartos de hotel. Hotelaria de lazer
+      premium deve competir por diferenciação (serviço, experiência), não por preço.</li>
+  <li><b>Leme / Copacabana</b> — equilíbrio (1:1) com o maior volume absoluto das duas pontas; mercado mais disputado
+      em termos de receita.</li>
+  <li><b>Centro</b> — hotelaria ainda predominante (perfil corporativo), temporada em 0,8× e mais frágil na baixa.</li>
+  <li><b>Barra/Recreio/São Conrado</b> e <b>Flamengo/Botafogo</b> — hotelaria claramente dominante (temporada ~0,4×);
+      menor exposição à concorrência da temporada.</li>
+</ul>
+
+<h2><span class="n">5</span> Conclusão e recomendações</h2>
+<p>O aluguel de temporada é, ao mesmo tempo, <b>um concorrente relevante e um componente da capacidade turística</b>
+da cidade. No agregado e no triênio analisado, <b>não comprimiu a ocupação hoteleira</b> — que cresceu —, mas
+pressiona margens em segmentos e datas específicas e avança em um ambiente de menor regulação. Recomenda-se:</p>
+<ul>
+  <li><b>Atuação institucional</b> por isonomia regulatória e tributária entre hotelaria e temporada, sustentada por
+      estes indicadores de escala e crescimento.</li>
+  <li><b>Estratégia comercial por região e sazonalidade</b>: defender diária nos picos (onde a temporada ataca) e
+      reforçar demanda corporativa/eventos na baixa (onde a hotelaria é mais forte e estável).</li>
+  <li><b>Monitoramento contínuo</b> da relação imóveis-temporada ÷ UHs e do diferencial de ocupação por bairro, usando
+      o painel interativo que acompanha este relatório.</li>
+</ul>
+
+<h2><span class="n">6</span> Metodologia e limitações</h2>
+<ul>
+  <li><b>Fontes:</b> ocupação hoteleira da pesquisa HotéisRIO (5 regiões, mensal); desempenho da temporada do AirDNA
+      (20 bairros agregados às mesmas regiões, ponderados pelo nº de imóveis).</li>
+  <li><b>Período:</b> dados de temporada disponíveis a partir de maio/2023; comparações anuais usam meses disponíveis
+      em cada ano.</li>
+  <li><b>Inventário não é diretamente comparável:</b> a hotelaria disponibiliza <b>quartos (UHs) duplos</b>; um único
+      imóvel de temporada (Airbnb) pode ter <b>mais de 6 quartos (UHs)</b>. Os hotéis contam quartos; a temporada
+      conta imóveis. O nº de imóveis de temporada refere-se aos <b>com reservas no mês</b> (subestima o total anunciado).</li>
+  <li><b>A hotelaria não coleta diária/RevPAR</b> nesta base — por isso a comparação de preço/receita restringe-se à
+      temporada.</li>
+  <li><b>Causalidade:</b> correlações não provam causa. Fatores externos (retomada pós-pandemia, câmbio, calendário de
+      eventos) influenciam simultaneamente as duas modalidades. As conclusões valem para o agregado da cidade no
+      triênio e podem diferir por bairro e período.</li>
+</ul>
+
+<footer>
+  Elaborado a partir do painel <b>Hotéis × Aluguel de Temporada</b> · HotéisRIO — Sindicato de Hotéis e Meios de
+  Hospedagem do Município do Rio de Janeiro. Dados consolidados em junho/2026. Documento de apoio técnico; números
+  sujeitos a revisão conforme atualização das fontes.
+</footer>
+</body></html>

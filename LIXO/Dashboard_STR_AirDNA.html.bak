@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Dashboard STR — AirDNA · Rio de Janeiro</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#1a1d27}
+::-webkit-scrollbar-thumb{background:#2d3148;border-radius:3px}
+.header{background:#131620;border-bottom:1px solid #1e2235;padding:14px 24px;display:flex;align-items:center;gap:16px}
+.logo{font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+.logo span{color:#2563eb}
+.subtitle{font-size:12px;color:#64748b;margin-left:auto}
+.filter-bar{background:#131620cc;border-bottom:1px solid #1e2235;padding:10px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.filter-group{display:flex;align-items:center;gap:6px}
+.filter-label{font-size:11px;color:#64748b;white-space:nowrap}
+select{background:#1e2235;border:1px solid #2d3148;color:#e2e8f0;padding:5px 8px;border-radius:6px;font-size:12px;cursor:pointer;outline:none}
+select:hover{border-color:#3d4560}
+.presets{display:flex;flex-wrap:wrap;gap:5px;margin-left:4px}
+.chip{background:#1e2235;border:1px solid #2d3148;color:#94a3b8;padding:4px 10px;border-radius:20px;font-size:11px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.chip:hover{border-color:#3d4560;color:#e2e8f0}
+.chip.active{background:#2563eb22;border-color:#2563eb;color:#60a5fa}
+.gran-toggle{display:flex;border:1px solid #2d3148;border-radius:6px;overflow:hidden;margin-left:auto}
+.region-bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:14px;padding:8px 12px;background:#131620;border:1px solid #1e2235;border-radius:8px}
+.region-bar-title{font-size:11px;color:#64748b;white-space:nowrap;margin-right:2px}
+.gran-btn{background:#1e2235;color:#94a3b8;padding:5px 14px;font-size:12px;cursor:pointer;border:none;transition:all .15s}
+.gran-btn:hover{color:#e2e8f0}
+.gran-btn.active{background:#2563eb;color:#fff}
+.tabs-bar{background:#0f1117;border-bottom:1px solid #1e2235;padding:0 24px;display:flex;gap:0;overflow-x:auto}
+.tab-btn{color:#64748b;padding:12px 18px;font-size:13px;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.tab-btn:hover{color:#e2e8f0}
+.tab-btn.active{color:#60a5fa;border-bottom-color:#2563eb}
+.content{padding:20px 24px;max-width:1600px;margin:0 auto}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+.section-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.section-title{font-size:16px;font-weight:600;color:#e2e8f0}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;background:#2563eb22;color:#60a5fa;border:1px solid #2563eb44}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kpi-card{background:#1a1d27;border:1px solid #1e2235;border-radius:10px;padding:14px 16px}
+.kpi-label{font-size:11px;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:22px;font-weight:700;color:#e2e8f0;letter-spacing:-0.5px}
+.kpi-delta{font-size:11px;margin-top:4px}
+.kpi-delta.pos{color:#10b981}
+.kpi-delta.neg{color:#ef4444}
+.kpi-delta.neu{color:#64748b}
+.charts-grid{display:grid;gap:16px;margin-bottom:16px}
+.chart-card{background:#1a1d27;border:1px solid #1e2235;border-radius:10px;padding:16px}
+.chart-title{font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:14px}
+.chart-wrap{position:relative;height:260px}
+.chart-wrap.tall{height:320px}
+.yoy-section{margin-bottom:28px}
+.yoy-title{font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:10px}
+.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid #1e2235}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#1e2235;color:#64748b;padding:8px 10px;text-align:right;font-weight:600;letter-spacing:.3px;white-space:nowrap}
+th:first-child{text-align:left}
+td{padding:7px 10px;text-align:right;border-top:1px solid #1a1d2755;white-space:nowrap}
+td:first-child{text-align:left;color:#94a3b8}
+tr:hover td{background:#1e223530}
+.dp{color:#10b981;font-weight:600}
+.dn{color:#ef4444;font-weight:600}
+.dn0{color:#64748b}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">STR<span>Analytics</span></div>
+  <div style="font-size:12px;color:#64748b">Rio de Janeiro · Dados AirDNA</div>
+  <div class="subtitle">mai/2023 – abr/2026</div>
+</div>
+
+<div class="filter-bar">
+  <div class="filter-group">
+    <span class="filter-label">De</span>
+    <select id="selStart"></select>
+    <span class="filter-label">Até</span>
+    <select id="selEnd"></select>
+  </div>
+  <div class="presets" id="presetsBar"></div>
+  <div class="gran-toggle">
+    <button class="gran-btn active" data-g="mensal">Mensal</button>
+    <button class="gran-btn" data-g="anual">Anual</button>
+  </div>
+</div>
+
+<div class="tabs-bar">
+  <button class="tab-btn active" data-tab="overview">Visão Geral</button>
+  <button class="tab-btn" data-tab="listings">Anúncios</button>
+  <button class="tab-btn" data-tab="occupancy">Ocupação</button>
+  <button class="tab-btn" data-tab="revenue">Receita</button>
+  <button class="tab-btn" data-tab="rates">Tarifas</button>
+  <button class="tab-btn" data-tab="seasonality">Sazonalidade</button>
+</div>
+
+<div class="content">
+
+  <!-- VISÃO GERAL -->
+  <div class="tab-pane active" id="tab-overview">
+    <div class="kpi-row" id="kpi-overview"></div>
+    <div class="charts-grid" style="grid-template-columns:2fr 1fr">
+      <div class="chart-card">
+        <div class="chart-title">RevPAR & Taxa de Ocupação — Rio de Janeiro</div>
+        <div class="chart-wrap tall"><canvas id="ch-overview-main"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Demanda (Listing-dias Reservados)</div>
+        <div class="chart-wrap tall"><canvas id="ch-overview-demand"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANÚNCIOS -->
+  <div class="tab-pane" id="tab-listings">
+    <div class="kpi-row" id="kpi-listings"></div>
+    <div class="charts-grid" style="grid-template-columns:1fr 1fr">
+      <div class="chart-card">
+        <div class="chart-title">Anúncios Reservados</div>
+        <div class="chart-wrap"><canvas id="ch-lst-trend"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Anúncios por Número de Quartos</div>
+        <div class="chart-wrap"><canvas id="ch-lst-bed"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Tempo Médio de Estadia (noites)</div>
+        <div class="chart-wrap"><canvas id="ch-lst-los"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Janelas de Antecedência da Reserva — mai/25–abr/26</div>
+        <div class="chart-wrap"><canvas id="ch-lst-adv"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OCUPAÇÃO -->
+  <div class="tab-pane" id="tab-occupancy">
+    <div class="region-bar"><span class="region-bar-title">Região:</span><div id="region-bar-occ" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>
+    <div class="kpi-row" id="kpi-occupancy"></div>
+    <div class="charts-grid" style="grid-template-columns:2fr 1fr">
+      <div class="chart-card">
+        <div class="chart-title">Taxa de Ocupação — Rio de Janeiro</div>
+        <div class="chart-wrap tall"><canvas id="ch-occ-trend"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Pace de Reservas — Próximos 30 dias (a partir de 14/mai/26)</div>
+        <div class="chart-wrap tall"><canvas id="ch-occ-future"></canvas></div>
+      </div>
+    </div>
+    <div class="charts-grid" style="grid-template-columns:2fr 1fr">
+      <div class="chart-card">
+        <div class="chart-title">Comparativo de Ocupação — Hotelaria Formal vs STR (mensal)</div>
+        <div class="chart-wrap tall"><canvas id="ch-occ-comp"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Ocupação Anual Média — Hotelaria vs STR</div>
+        <div class="chart-wrap tall"><canvas id="ch-occ-annual"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECEITA -->
+  <div class="tab-pane" id="tab-revenue">
+    <div class="section-header">
+      <span class="section-title">Receita</span>
+      <span class="badge">📍 Copacabana</span>
+    </div>
+    <div class="kpi-row" id="kpi-revenue"></div>
+    <div class="charts-grid" style="grid-template-columns:1fr 1fr">
+      <div class="chart-card">
+        <div class="chart-title">Receita Média Mensal</div>
+        <div class="chart-wrap"><canvas id="ch-rev-avg"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Receita por Número de Quartos</div>
+        <div class="chart-wrap"><canvas id="ch-rev-bed"></canvas></div>
+      </div>
+      <div class="chart-card" style="grid-column:1/-1">
+        <div class="chart-title">Distribuição por Percentil (P25 / P50 / P75 / P90)</div>
+        <div class="chart-wrap"><canvas id="ch-rev-pct"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TARIFAS -->
+  <div class="tab-pane" id="tab-rates">
+    <div class="section-header">
+      <span class="section-title">Tarifas</span>
+      <span class="badge">📍 Copacabana</span>
+    </div>
+    <div class="kpi-row" id="kpi-rates"></div>
+    <div class="charts-grid" style="grid-template-columns:1fr 1fr">
+      <div class="chart-card">
+        <div class="chart-title">Tarifa Diária Média Mensal</div>
+        <div class="chart-wrap"><canvas id="ch-rate-avg"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Tarifa por Faixa de Preço</div>
+        <div class="chart-wrap"><canvas id="ch-rate-tier"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Tarifa por Número de Quartos</div>
+        <div class="chart-wrap"><canvas id="ch-rate-bed"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Tarifa Diária Histórica — jun/25 a mai/26</div>
+        <div class="chart-wrap"><canvas id="ch-rate-daily"></canvas></div>
+      </div>
+      <div class="chart-card" style="grid-column:1/-1">
+        <div class="chart-title">Previsão de Tarifa & Anúncios Reservados — mai a out/26</div>
+        <div class="chart-wrap"><canvas id="ch-rate-future"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAZONALIDADE -->
+  <div class="tab-pane" id="tab-seasonality">
+    <div class="section-header">
+      <span class="section-title">Comparativo Ano a Ano</span>
+    </div>
+    <div class="yoy-section">
+      <div class="yoy-title">Ocupação (%)</div>
+      <div class="tbl-wrap"><table id="tbl-occ"></table></div>
+    </div>
+    <div class="yoy-section">
+      <div class="yoy-title">RevPAR — Rio de Janeiro (R$)</div>
+      <div class="tbl-wrap"><table id="tbl-rev"></table></div>
+    </div>
+    <div class="yoy-section">
+      <div class="yoy-title">Receita Média — Copacabana (R$)</div>
+      <div class="tbl-wrap"><table id="tbl-coprev"></table></div>
+    </div>
+    <div class="yoy-section">
+      <div class="yoy-title">Tarifa Diária Média — Copacabana (R$)</div>
+      <div class="tbl-wrap"><table id="tbl-coprate"></table></div>
+    </div>
+    <div class="section-header" style="margin-top:28px">
+      <span class="section-title">Hotelaria Formal vs STR</span>
+      <span class="badge" style="background:#10b98122;color:#10b981;border-color:#10b98144">Fonte: HotéisRIO</span>
+    </div>
+    <div class="region-bar"><span class="region-bar-title">Região:</span><div id="region-bar-sea" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>
+    <div class="yoy-section">
+      <div class="yoy-title" id="tbl-hotelvsstr-title">Comparativo de Ocupação — Hotelaria Formal (%) vs STR AirDNA (%)</div>
+      <div class="tbl-wrap"><table id="tbl-hotelvsstr"></table></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════ DATA ══════════════════
+const monthlyKeys=["2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04"];
+const mOcc=[54.39,54.84,65.33,62.68,63.69,64.93,68.16,55.94,53.97,57.70,49.92,54.12,52.07,50.17,64.84,60.77,62.69,51.95,63.38,61.09,60.37,72.42,56.73,60.15,46.52,57.43,57.33,60.66,61.96,63.50,64.14,60.12,60.96,67.97,54.23,61.42];
+const mRev=[180.11,186.74,226.49,211.61,226.84,232.48,254.90,247.66,260.31,301.03,207.66,233.18,194.77,190.07,248.45,231.56,297.75,202.72,274.09,299.59,310.96,362.74,294.94,281.84,191.60,224.34,222.94,226.44,233.09,247.89,274.43,299.29,330.60,416.64,252.94,267.97];
+const mDem=[228500,220995,267722,259194,282571,311712,387199,348668,385800,401058,331621,301822,317007,283459,344422,336451,425599,370006,416730,441258,554516,507585,584151,486552,429492,392433,432200,428812,432518,464254,491116,532085,692933,685601,593720,538640];
+const mLst=[13816,14578,14183,14211,16041,16971,20980,24639,24495,27514,19494,19214,21974,19887,18646,18932,27186,20947,24869,31692,31760,32361,35768,31220,30971,26754,23819,24271,24448,25349,29012,38057,39813,43037,30656,32342];
+const mLos=[null,null,null,null,null,null,null,null,null,null,null,6.56,5.12,6.32,6.19,5.65,5.01,5.54,5.13,5.48,6.03,5.57,5.82,5.04,5.03,5.52,5.75,5.53,5.46,5.07,5.04,5.25,5.76,5.47,5.71,4.96];
+const mBed1=[9999,9950,10023,9755,10575,11359,13190,16575,16680,17688,17820,13915,15441,14310,13079,13363,17664,17688,16761,21098,21616,21653,23515,22360,22394,19507,18819,17618,17945,18381,20239,26224,27560,29170,28291,23144];
+const mBed2=[4085,3950,3957,3840,4097,4442,5332,6719,6772,7127,6953,5275,5686,5235,4902,5005,6886,6742,6176,7947,8100,8116,8676,8226,7876,6661,6560,6058,5958,6129,6864,9034,9629,10352,9865,7807];
+const mBed3=[1602,1552,1661,1587,1675,1791,2193,2697,2644,2925,2862,2072,2210,1972,1888,1900,2512,2466,2348,2986,3053,3187,3354,3143,2889,2431,2412,2210,2178,2210,2499,3219,3389,3690,3493,2711];
+const mBed4=[322,309,316,304,338,364,417,518,509,580,588,413,409,358,354,342,494,474,437,546,567,596,628,568,494,403,401,377,369,359,435,575,588,651,625,462];
+// Copacabana Revenue
+const copRevAvg=[5418.86,4990.35,6528.37,6290.99,6215.67,6745.27,7260.72,6265.05,8104.54,7824.24,7143.53,6527.50,5191.64,5188.81,6962.48,6717.10,7841.83,7152.72,7501.41,7203.40,10133.80,8780.72,9457.77,7499.21,6153.04,5918.97,7338.64,6967.23,6957.21,7545.96,7404.43,7438.79,10653.14,11207.76,9942.88,7778.08];
+const copRevP25=[2214.90,2020.49,3020.92,2881.16,2827.44,3282.30,3710.01,2266.59,2879.25,3148.48,2952.87,2540.75,1766.48,1476.74,3383.40,3061.41,3544.38,3442.98,2991.23,2338.41,3884.85,3263.09,3734.64,2819.44,1960.57,2339.53,3590.58,3294.55,3572.82,3902.77,3215.34,2490.86,4204.24,4812.28,5170.68,3685.50];
+const copRevP50=[4273.33,3834.13,5249.39,5029.57,5007.63,5701.11,5873.78,4691.20,6293.49,5739.87,5451.08,4936.31,3969.43,3975.42,5704.37,5288.89,6119.55,5721.34,5796.95,5438.16,8058.35,6800.01,7233.72,5656.54,4671.26,4651.33,5947.25,5616.94,5710.13,6290.22,5911.57,5636.91,8757.49,8658.98,8193.13,6472.09];
+const copRevP75=[6708.26,6364.56,8078.20,7641.55,7465.22,8483.49,8762.04,8231.82,10305.96,9336.00,8553.84,7788.17,6798.88,6714.87,8537.49,8158.27,9314.56,8768.58,8985.27,9408.02,12261.93,10268.47,11359.06,8905.67,8149.13,7578.52,8909.75,8403.81,8310.00,9239.10,8962.70,9746.83,13530.89,14254.17,11594.05,9463.44];
+const copRevP90=[10404.64,9799.40,12688.83,11335.22,11105.36,12391.96,13371.59,12414.39,15456.51,14429.27,13470.31,12610.41,10424.26,10583.27,12847.10,12508.99,14380.38,13472.29,13785.15,14598.44,18317.72,16269.82,17236.81,14061.90,12365.77,11226.40,14267.84,12681.32,12377.28,14003.10,13433.46,14934.30,20629.24,21342.11,17932.13,14067.82];
+const copRevB1=[4270.50,3815.13,4806.14,4747.18,4747.52,5338.95,5517.95,4994.40,6237.71,5779.91,5499.39,4885.86,4194.71,4145.35,5420.08,5161.44,5983.41,5623.54,5606.75,5669.16,7675.94,6468.56,7218.32,5624.47,5009.79,4671.29,5523.16,5366.18,5451.00,5968.84,5831.90,6071.24,8418.63,8895.99,7876.12,6160.62];
+const copRevB2=[6211.74,6026.85,7928.79,7507.61,7217.95,7909.19,8514.93,7328.94,9394.67,8995.74,8264.60,7634.17,5962.11,6290.36,8659.20,8015.57,9127.48,8804.93,8943.77,8622.08,11570.53,9751.39,10708.66,8662.93,6992.80,6878.49,9100.29,8378.37,8354.61,9230.38,8837.48,8682.20,12786.15,13226.89,11884.94,9359.82];
+const copRevB3=[9227.32,8466.93,11363.70,10462.99,10698.81,10829.28,12337.17,10499.45,15023.21,13823.90,13440.38,12814.61,9141.92,8764.48,12240.54,11611.85,13915.38,12470.71,13194.96,12199.19,17530.53,14952.49,16238.11,14000.45,10303.48,10285.27,13918.28,12819.91,12621.42,13796.46,13113.88,12901.55,18684.17,18774.90,17512.50,13762.04];
+const copRevB4=[11918.64,10827.11,16017.99,17251.96,14633.24,16419.75,16759.96,14715.55,21039.24,20771.63,16854.77,15959.80,11811.15,11950.81,15597.78,15613.24,18653.97,16669.57,20351.29,18008.90,27522.95,24307.46,21921.55,20827.74,16200.07,14619.83,17252.74,18185.76,16664.45,18683.64,19289.19,15996.65,26995.20,28276.18,25745.61,20143.54];
+// Copacabana Rates
+const copRateAvg=[312,324,329,327,338,346,362,432,474,503,402,403,371,365,364,364,460,382,425,486,520,503,519,461,420,391,380,367,370,384,419,498,555,633,469,443];
+const copRateBudget=[193,208,214,208,219,231,226,264,281,285,239,231,241,239,251,243,301,260,268,293,306,277,282,263,256,250,243,232,229,250,257,288,332,358,291,281];
+const copRateEconomy=[248,260,265,262,267,284,275,338,349,362,296,294,289,285,287,275,345,292,312,359,371,343,355,328,319,299,298,285,286,302,318,363,413,461,359,349];
+const copRateMid=[295,312,311,308,314,325,335,414,430,448,364,354,348,338,339,333,426,353,383,438,451,420,444,402,387,357,349,340,338,355,378,446,503,564,421,403];
+const copRateUpscale=[374,377,380,377,382,394,411,486,533,543,443,438,414,414,411,405,514,434,472,548,573,554,578,516,480,441,434,425,424,440,470,557,611,686,504,478];
+const copRateLuxury=[536,535,549,557,594,571,632,721,942,982,812,844,708,688,676,731,925,727,886,955,1244,1276,1206,1002,858,821,770,741,772,749,837,958,1001,1098,814,736];
+const copRateB1=[235.52,239.40,238.49,239.43,249.19,263.53,266.51,331.28,353.94,360.65,299.54,292.89,288.45,282.31,276.93,271.48,342.61,292.35,310.33,371.52,385.77,359.23,381.01,338.20,329.91,299.78,284.84,278.79,282.77,298.58,321.34,394.60,429.78,489.58,362.60,343.57];
+const copRateB2=[385.54,398.34,396.93,402.53,411.42,429.36,441.56,536.75,567.24,603.03,486.49,492.63,458.67,457.01,459.00,446.64,556.32,489.74,524.36,606.02,610.30,587.68,625.54,561.57,522.80,480.48,472.37,452.45,458.30,484.32,522.74,613.12,684.80,779.20,586.13,551.12];
+const copRateB3=[610.92,639.04,619.38,612.88,653.48,637.48,683.18,838.45,995.09,986.35,848.50,871.01,745.11,719.05,699.67,701.32,886.71,734.57,811.29,905.59,957.06,935.27,1000.71,911.44,775.83,735.37,717.38,701.51,724.92,745.20,817.02,933.66,1034.44,1130.80,880.89,840.36];
+const copRateB4=[849.11,898.40,908.89,1050.88,970.97,950.18,952.52,1125.04,1368.65,1450.51,1076.95,1164.33,997.21,970.62,958.32,1085.88,1217.84,1022.84,1258.94,1418.60,1589.15,1558.17,1446.32,1268.36,1116.16,1094.66,987.78,1076.39,1031.69,1083.80,1243.04,1257.80,1557.58,1761.50,1355.53,1226.64];
+// Daily rate history (Copacabana jun/25–mai/26, 345 days)
+const dRateDates=["2025-06-01","2025-06-02","2025-06-03","2025-06-04","2025-06-05","2025-06-06","2025-06-07","2025-06-08","2025-06-09","2025-06-10","2025-06-11","2025-06-12","2025-06-13","2025-06-14","2025-06-15","2025-06-16","2025-06-17","2025-06-18","2025-06-19","2025-06-20","2025-06-21","2025-06-22","2025-06-23","2025-06-24","2025-06-25","2025-06-26","2025-06-27","2025-06-28","2025-06-29","2025-06-30","2025-07-01","2025-07-02","2025-07-03","2025-07-04","2025-07-05","2025-07-06","2025-07-07","2025-07-08","2025-07-09","2025-07-10","2025-07-11","2025-07-12","2025-07-13","2025-07-14","2025-07-15","2025-07-16","2025-07-17","2025-07-18","2025-07-19","2025-07-20","2025-07-21","2025-07-22","2025-07-23","2025-07-24","2025-07-25","2025-07-26","2025-07-27","2025-07-28","2025-07-29","2025-07-30","2025-07-31","2025-08-01","2025-08-02","2025-08-03","2025-08-04","2025-08-05","2025-08-06","2025-08-07","2025-08-08","2025-08-09","2025-08-10","2025-08-11","2025-08-12","2025-08-13","2025-08-14","2025-08-15","2025-08-16","2025-08-17","2025-08-18","2025-08-19","2025-08-20","2025-08-21","2025-08-22","2025-08-23","2025-08-24","2025-08-25","2025-08-26","2025-08-27","2025-08-28","2025-08-29","2025-08-30","2025-08-31","2025-09-01","2025-09-02","2025-09-03","2025-09-04","2025-09-05","2025-09-06","2025-09-07","2025-09-08","2025-09-09","2025-09-10","2025-09-11","2025-09-12","2025-09-13","2025-09-14","2025-09-15","2025-09-16","2025-09-17","2025-09-18","2025-09-19","2025-09-20","2025-09-21","2025-09-22","2025-09-23","2025-09-24","2025-09-25","2025-09-26","2025-09-27","2025-09-28","2025-09-29","2025-09-30","2025-10-01","2025-10-02","2025-10-03","2025-10-04","2025-10-05","2025-10-06","2025-10-07","2025-10-08","2025-10-09","2025-10-10","2025-10-11","2025-10-12","2025-10-13","2025-10-14","2025-10-15","2025-10-16","2025-10-17","2025-10-18","2025-10-19","2025-10-20","2025-10-21","2025-10-22","2025-10-23","2025-10-24","2025-10-25","2025-10-26","2025-10-27","2025-10-28","2025-10-29","2025-10-30","2025-10-31","2025-11-01","2025-11-02","2025-11-03","2025-11-04","2025-11-05","2025-11-06","2025-11-07","2025-11-08","2025-11-09","2025-11-10","2025-11-11","2025-11-12","2025-11-13","2025-11-14","2025-11-15","2025-11-16","2025-11-17","2025-11-18","2025-11-19","2025-11-20","2025-11-21","2025-11-22","2025-11-23","2025-11-24","2025-11-25","2025-11-26","2025-11-27","2025-11-28","2025-11-29","2025-11-30","2025-12-01","2025-12-02","2025-12-03","2025-12-04","2025-12-05","2025-12-06","2025-12-07","2025-12-08","2025-12-09","2025-12-10","2025-12-11","2025-12-12","2025-12-13","2025-12-14","2025-12-15","2025-12-16","2025-12-17","2025-12-18","2025-12-19","2025-12-20","2025-12-21","2025-12-22","2025-12-23","2025-12-24","2025-12-25","2025-12-26","2025-12-27","2025-12-28","2025-12-29","2025-12-30","2025-12-31","2026-01-01","2026-01-02","2026-01-03","2026-01-04","2026-01-05","2026-01-06","2026-01-07","2026-01-08","2026-01-09","2026-01-10","2026-01-11","2026-01-12","2026-01-13","2026-01-14","2026-01-15","2026-01-16","2026-01-17","2026-01-18","2026-01-19","2026-01-20","2026-01-21","2026-01-22","2026-01-23","2026-01-24","2026-01-25","2026-01-26","2026-01-27","2026-01-28","2026-01-29","2026-01-30","2026-01-31","2026-02-01","2026-02-02","2026-02-03","2026-02-04","2026-02-05","2026-02-06","2026-02-07","2026-02-08","2026-02-09","2026-02-10","2026-02-11","2026-02-12","2026-02-13","2026-02-14","2026-02-15","2026-02-16","2026-02-17","2026-02-18","2026-02-19","2026-02-20","2026-02-21","2026-02-22","2026-02-23","2026-02-24","2026-02-25","2026-02-26","2026-02-27","2026-02-28","2026-03-01","2026-03-02","2026-03-03","2026-03-04","2026-03-05","2026-03-06","2026-03-07","2026-03-08","2026-03-09","2026-03-10","2026-03-11","2026-03-12","2026-03-13","2026-03-14","2026-03-15","2026-03-16","2026-03-17","2026-03-18","2026-03-19","2026-03-20","2026-03-21","2026-03-22","2026-03-23","2026-03-24","2026-03-25","2026-03-26","2026-03-27","2026-03-28","2026-03-29","2026-03-30","2026-03-31","2026-04-01","2026-04-02","2026-04-03","2026-04-04","2026-04-05","2026-04-06","2026-04-07","2026-04-08","2026-04-09","2026-04-10","2026-04-11","2026-04-12","2026-04-13","2026-04-14","2026-04-15","2026-04-16","2026-04-17","2026-04-18","2026-04-19","2026-04-20","2026-04-21","2026-04-22","2026-04-23","2026-04-24","2026-04-25","2026-04-26","2026-04-27","2026-04-28","2026-04-29","2026-04-30","2026-05-01","2026-05-02","2026-05-03","2026-05-04","2026-05-05","2026-05-06","2026-05-07","2026-05-08","2026-05-09","2026-05-10","2026-05-11"];
+const dRateVals=[364,349,347,350,368,378,380,371,357,353,357,368,381,389,376,367,369,395,428,442,442,430,401,396,400,411,396,401,391,384,379,385,394,405,404,393,376,371,373,374,389,391,380,374,372,373,380,390,390,380,369,368,366,375,390,386,376,368,368,369,372,380,378,365,350,349,349,362,380,379,366,347,344,355,374,390,389,374,356,352,352,357,379,381,365,353,347,358,374,391,383,367,345,336,344,360,383,386,364,347,346,351,369,383,384,370,352,346,369,384,399,399,380,361,354,358,370,392,391,374,364,358,372,385,401,402,381,364,356,363,378,400,405,385,373,368,373,383,403,401,381,364,362,368,379,404,409,391,374,371,375,392,416,414,396,378,370,385,400,424,423,405,392,388,400,409,428,423,403,390,393,417,442,470,474,452,421,409,407,416,436,444,431,419,415,414,428,450,454,440,419,407,411,432,453,460,454,435,429,436,457,475,497,496,496,496,491,498,521,562,590,622,629,633,632,667,677,646,607,574,554,541,550,562,567,551,523,516,517,538,557,561,532,517,507,511,530,552,552,529,515,507,521,533,558,555,507,490,494,504,531,558,566,543,530,551,607,700,816,835,818,778,744,703,705,702,680,614,549,523,511,521,539,533,519,493,480,482,492,502,501,477,457,448,454,466,479,479,454,445,437,444,462,478,482,459,443,440,445,463,481,481,467,460,456,438,467,489,489,451,418,406,408,426,444,447,427,406,400,406,427,468,483,468,446,418,412,424,452,457,440,420,419,442,499,552,564,505,437,405,400,415,435,431,406,381];
+// Future rate (Copacabana, mai–out/26)
+const futDates=["2026-05-14","2026-05-15","2026-05-16","2026-05-17","2026-05-18","2026-05-19","2026-05-20","2026-05-21","2026-05-22","2026-05-23","2026-05-24","2026-05-25","2026-05-26","2026-05-27","2026-05-28","2026-05-29","2026-05-30","2026-05-31","2026-06-01","2026-06-02","2026-06-03","2026-06-04","2026-06-05","2026-06-06","2026-06-07","2026-06-08","2026-06-09","2026-06-10","2026-06-11","2026-06-12","2026-06-13","2026-06-14","2026-06-15","2026-06-16","2026-06-17","2026-06-18","2026-06-19","2026-06-20","2026-06-21","2026-06-22","2026-06-23","2026-06-24","2026-06-25","2026-06-26","2026-06-27","2026-06-28","2026-06-29","2026-06-30","2026-07-01","2026-07-02","2026-07-03","2026-07-04","2026-07-05","2026-07-06","2026-07-07","2026-07-08","2026-07-09","2026-07-10","2026-07-11","2026-07-12","2026-07-13","2026-07-14","2026-07-15","2026-07-16","2026-07-17","2026-07-18","2026-07-19","2026-07-20","2026-07-21","2026-07-22","2026-07-23","2026-07-24","2026-07-25","2026-07-26","2026-07-27","2026-07-28","2026-07-29","2026-07-30","2026-07-31","2026-08-01","2026-08-02","2026-08-03","2026-08-04","2026-08-05","2026-08-06","2026-08-07","2026-08-08","2026-08-09","2026-08-10","2026-08-11","2026-08-12","2026-08-13","2026-08-14","2026-08-15","2026-08-16","2026-08-17","2026-08-18","2026-08-19","2026-08-20","2026-08-21","2026-08-22","2026-08-23","2026-08-24","2026-08-25","2026-08-26","2026-08-27","2026-08-28","2026-08-29","2026-08-30","2026-08-31","2026-09-01","2026-09-02","2026-09-03","2026-09-04","2026-09-05","2026-09-06","2026-09-07","2026-09-08","2026-09-09","2026-09-10","2026-09-11","2026-09-12","2026-09-13","2026-09-14","2026-09-15","2026-09-16","2026-09-17","2026-09-18","2026-09-19","2026-09-20","2026-09-21","2026-09-22","2026-09-23","2026-09-24","2026-09-25","2026-09-26","2026-09-27","2026-09-28","2026-09-29","2026-09-30","2026-10-01","2026-10-02","2026-10-03","2026-10-04","2026-10-05","2026-10-06","2026-10-07","2026-10-08","2026-10-09","2026-10-10","2026-10-11","2026-10-12","2026-10-13","2026-10-14","2026-10-15","2026-10-16","2026-10-17","2026-10-18","2026-10-19","2026-10-20","2026-10-21","2026-10-22","2026-10-23","2026-10-24","2026-10-25","2026-10-26","2026-10-27","2026-10-28","2026-10-29","2026-10-30","2026-10-31"];
+const futRateVals=[344.88,364.58,364.58,349.80,339.95,335.02,335.02,344.88,364.58,369.51,354.73,344.88,335.02,339.95,354.73,364.58,364.58,349.80,339.95,344.88,369.51,399.07,413.85,413.85,379.36,344.88,335.02,330.10,344.88,354.73,349.80,335.02,325.17,320.24,325.17,335.02,344.88,349.80,339.95,330.10,325.17,330.10,335.02,354.73,354.73,344.88,339.95,330.10,339.95,344.88,354.73,349.80,339.95,335.02,335.02,335.02,344.88,349.80,354.73,339.95,335.02,335.02,339.95,335.02,349.80,354.73,349.80,344.88,344.88,339.95,349.80,359.66,369.51,354.73,349.80,339.95,339.95,349.80,369.51,369.51,349.80,349.80,349.80,349.80,359.66,374.44,374.44,369.51,354.73,349.80,354.73,359.66,374.44,374.44,369.51,359.66,349.80,349.80,354.73,374.44,374.44,369.51,354.73,349.80,349.80,359.66,374.44,379.36,374.44,359.66,349.80,354.73,359.66,379.36,389.22,384.29,374.44,359.66,349.80,359.66,374.44,384.29,369.51,354.73,349.80,339.95,354.73,369.51,369.51,364.58,359.66,349.80,344.88,364.58,394.14,399.07,384.29,374.44,354.73,339.95,349.80,354.73,359.66,349.80,344.88,339.95,339.95,349.80,359.66,379.36,364.58,354.73,349.80,359.66,374.44,379.36,374.44,359.66,349.80,344.88,349.80,364.58,374.44,374.44,364.58,354.73,349.80,359.66,364.58,379.36,379.36];
+const futListings=[5646,6106,6257,5483,4764,4387,4413,4716,5159,5310,4736,4109,3610,3454,3630,3867,3898,3418,3099,3506,4775,6668,7132,6999,5115,3705,2958,2753,2948,3197,3244,2932,2585,2418,2367,2512,2610,2633,2427,2241,2107,2115,2121,2190,2198,2020,1890,1776,1815,1869,1910,1957,1877,1860,1832,1918,2115,2177,2234,2084,1970,1906,1915,1938,1998,2078,2032,2017,1995,1989,2031,2075,2087,1975,1874,1772,1692,1654,1587,1533,1440,1417,1411,1458,1567,1698,1772,1731,1788,1680,1601,1628,1683,1694,1614,1519,1437,1420,1410,1405,1388,1321,1265,1219,1196,1158,1176,1139,1061,992,1095,1243,1560,2000,2268,2235,1980,1674,1749,2116,2331,2286,1878,1495,1254,1187,1207,1220,1212,1160,1109,1059,1069,1152,1194,1179,1123,1026,919,841,849,831,819,777,793,788,808,860,944,1037,1050,947,887,875,914,916,903,850,793,780,764,812,794,775,757,707,668,689,697,691,693];
+// Future occupancy pace
+const futOccDates=["2026-05-14","2026-05-15","2026-05-16","2026-05-17","2026-05-18","2026-05-19","2026-05-20","2026-05-21","2026-05-22","2026-05-23","2026-05-24","2026-05-25","2026-05-26","2026-05-27","2026-05-28","2026-05-29","2026-05-30","2026-05-31","2026-06-01","2026-06-02","2026-06-03","2026-06-04","2026-06-05","2026-06-06","2026-06-07","2026-06-08","2026-06-09","2026-06-10","2026-06-11","2026-06-12","2026-06-13"];
+const futOccLast7=[2728,2856,2973,2231,1710,1528,1454,1501,1669,1794,1510,1262,1178,1167,1266,1453,1486,1204,965,1019,1371,2002,2175,2184,1566,1194,1026,1020,1074,1194,1169];
+const futOccLast30=[7198,7898,8254,6654,5431,5008,4988,5321,5918,6227,5292,4528,4178,4067,4340,4758,4835,4056,3382,3595,4707,6658,7279,7273,5225,3898,3306,3234,3440,3813,3790];
+// Ocupação Hoteleira Formal — HotéisRIO (alinhada ao monthlyKeys, mai/23–abr/26)
+// 2023: mai-dez | 2024: jan-dez | 2025: jan-dez | 2026: jan-abr sem dados → null
+const hOcc=[60.58,60.90,67.34,71.67,69.85,74.71,81.98,67.13,  // mai–dez 2023
+            70.82,75.60,72.20,67.20,67.89,67.07,70.15,72.50,78.25,77.78,81.61,76.79, // jan–dez 2024
+            84.41,85.71,84.10,76.75,72.81,66.33,74.13,72.87,79.27,81.49,78.64,76.21, // jan–dez 2025
+            null,null,null,null]; // jan–abr 2026 (sem dados hotelaria formal)
+
+// ── STR Ocupação por Região (média dos bairros AirDNA, mai/23–abr/26) ──────
+// Leme / Copacabana (avg Copacabana + Leme)
+const strCopa=[56.08,56.07,68.37,65.93,66.70,67.84,71.84,56.16,59.19,60.98,53.80,55.49,50.96,50.70,68.19,64.76,66.86,55.80,67.24,62.81,65.00,77.01,60.95,61.35,48.91,59.57,59.08,62.37,65.57,66.10,67.08,61.08,65.89,72.26,58.42,63.05];
+// Ipanema / Leblon (avg Ipanema + Leblon)
+const strIpanema=[54.35,56.17,69.52,64.50,63.84,65.93,69.46,58.52,59.00,62.83,53.01,55.43,55.84,48.51,67.43,63.91,64.88,58.54,67.86,64.09,69.52,78.91,64.33,65.14,50.03,59.34,61.12,66.46,64.09,67.33,69.00,64.50,70.20,73.53,63.34,64.97];
+// Flamengo / Botafogo (avg Flamengo + Botafogo)
+const strFlamengo=[63.10,61.99,69.10,68.32,69.78,71.53,73.65,59.54,55.75,60.98,54.96,61.54,58.88,54.40,69.65,68.35,67.95,57.63,69.21,63.12,59.06,77.03,56.93,63.64,49.17,60.97,58.45,65.48,65.14,66.89,68.90,61.75,61.81,70.64,56.61,65.20];
+// Barra da Tijuca / Recreio (avg Barra + Recreio)
+const strBarra=[48.39,49.42,60.48,52.29,58.11,58.21,61.75,54.99,49.91,48.64,44.03,49.90,49.57,48.95,61.22,51.52,54.76,40.59,52.76,58.56,55.49,59.76,46.82,54.02,39.81,52.54,55.44,49.63,55.87,57.00,54.60,57.77,55.61,57.72,42.81,55.44];
+// Centro
+const strCentro=[54.65,54.47,63.32,64.17,66.71,69.25,72.49,55.70,52.75,57.09,48.90,54.40,57.84,55.16,67.04,65.50,69.13,56.49,65.35,60.69,60.66,72.00,56.80,59.57,47.64,56.51,54.08,60.82,62.08,62.76,63.39,56.30,60.29,66.29,52.31,59.21];
+
+// ── Hotelaria Formal por Região (HotéisRIO, alinhada ao monthlyKeys) ────────
+// Leme / Copacabana
+const hCopa=[68.11,66.29,77.42,79.29,78.01,80.54,86.63,75.70,
+             72.45,80.99,83.58,77.77,74.62,74.73,79.48,83.78,86.92,86.07,90.49,83.37,
+             91.32,92.80,92.47,84.39,81.24,75.59,85.89,86.47,85.98,89.34,89.50,86.24,
+             null,null,null,null];
+// Ipanema / Leblon
+const hIpanema=[68.77,64.08,71.65,79.03,75.99,78.84,81.40,76.59,
+                76.45,80.75,80.19,76.81,72.82,73.88,75.44,74.68,79.89,77.80,84.07,84.44,
+                85.77,86.37,87.58,78.78,75.97,66.96,80.57,80.14,78.29,86.70,83.13,83.12,
+                null,null,null,null];
+// Flamengo / Botafogo
+const hFlamengo=[61.53,61.96,62.93,74.67,70.64,77.44,85.66,66.86,
+                 63.64,72.21,66.63,57.37,68.30,73.44,71.92,75.89,81.16,79.03,79.88,72.20,
+                 81.58,84.10,81.88,71.16,73.96,70.53,77.91,72.66,79.33,77.27,80.72,68.93,
+                 null,null,null,null];
+// Barra da Tijuca / Recreio
+const hBarra=[53.75,53.50,65.53,61.42,66.04,68.43,72.43,60.51,
+              75.65,72.32,66.86,54.38,57.55,59.45,64.93,63.78,69.54,69.96,73.41,74.82,
+              85.61,83.68,83.62,75.33,67.37,59.34,70.60,66.33,76.44,80.56,72.66,74.21,
+              null,null,null,null];
+// Centro
+const hCentro=[55.29,58.04,55.01,68.88,60.86,68.32,81.98,60.32,
+               65.61,69.27,55.53,58.23,65.06,59.16,56.86,61.81,70.16,73.21,75.07,62.07,
+               69.94,75.04,75.56,67.20,68.95,62.71,60.84,64.50,70.61,70.14,71.62,65.64,
+               null,null,null,null];
+
+// Advance booking windows (12 months fixed)
+const advKeys=["2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04"];
+const adv06=[25955,24219,30246,29392,29736,31663,30133,29551,38191,31718,38806,35500];
+const adv714=[10349,9558,11155,11331,12004,13317,12339,11888,15398,12054,14661,14662];
+const adv1530=[12594,12568,12347,13470,14979,16174,16148,15306,19010,19487,17813,18799];
+const adv3160=[12596,11824,10769,11358,12291,14411,16838,15902,19135,22899,17696,17815];
+const adv6190=[9143,5946,5115,5160,4988,6000,8333,10964,10103,14008,7790,10109];
+const adv91p=[13095,9462,6529,7180,6589,6997,10569,22605,16145,27605,8261,10345];
+
+// ══════════════════ STATE ══════════════════
+const SEASON_MONTHS={alta:[12,1,2],baixa:[5,6]};
+let state={gran:'mensal',startMonth:'2023-05',endMonth:'2026-04',season:null,activePreset:'all'};
+let activeRegion='cidade';
+const REGIONS={
+  cidade:{label:'Rio de Janeiro (Cidade)',str:mOcc,hotel:hOcc},
+  copa:{label:'Leme / Copacabana',str:strCopa,hotel:hCopa},
+  ipanema:{label:'Ipanema / Leblon',str:strIpanema,hotel:hIpanema},
+  flamengo:{label:'Flamengo / Botafogo',str:strFlamengo,hotel:hFlamengo},
+  barra:{label:'Barra da Tijuca / Recreio',str:strBarra,hotel:hBarra},
+  centro:{label:'Centro',str:strCentro,hotel:hCentro},
+};
+const PRESETS={
+  all:{start:'2023-05',end:'2026-04',season:null,label:'Todos 36m'},
+  y2023:{start:'2023-05',end:'2023-12',season:null,label:'2023'},
+  y2024:{start:'2024-01',end:'2024-12',season:null,label:'2024'},
+  y2025:{start:'2025-01',end:'2025-12',season:null,label:'2025'},
+  y2026:{start:'2026-01',end:'2026-04',season:null,label:'2026'},
+  l12m:{start:'2025-05',end:'2026-04',season:null,label:'Últimos 12m'},
+  ytd26:{start:'2026-01',end:'2026-04',season:null,label:'YTD 2026'},
+  carnaval:{start:'2025-02',end:'2025-02',season:null,label:'Carnaval Fev/25'},
+  alta:{start:'2023-05',end:'2026-04',season:'alta',label:'Alta Temp (Dez-Fev)'},
+  baixa:{start:'2023-05',end:'2026-04',season:'baixa',label:'Baixa Temp (Mai-Jun)'},
+};
+
+// ══════════════════ HELPERS ══════════════════
+const MNAMES_PT=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function fmtM(k){const[y,m]=k.split('-');return MNAMES_PT[+m-1]+'/'+y.slice(2);}
+function fmtBRL(v,dec=0){if(v==null||isNaN(v))return'–';return'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:dec});}
+function fmtPct(v){if(v==null||isNaN(v))return'–';return v.toFixed(1).replace('.',',')+'%';}
+function fmtNum(v){return v==null?'–':v.toLocaleString('pt-BR');}
+function avg(arr){const a=arr.filter(x=>x!=null&&!isNaN(x));return a.length?a.reduce((s,x)=>s+x,0)/a.length:null;}
+function sum(arr){return arr.filter(x=>x!=null&&!isNaN(x)).reduce((s,x)=>s+x,0);}
+function monthPasses(k){
+  if(k<state.startMonth||k>state.endMonth)return false;
+  if(state.season){const m=+k.split('-')[1];return SEASON_MONTHS[state.season].includes(m);}
+  return true;
+}
+function getIdxs(){return monthlyKeys.reduce((a,k,i)=>{if(monthPasses(k))a.push(i);return a;},[]); }
+function aggAnnual(vals,idxs,useSum=false){
+  const map={};
+  idxs.forEach(i=>{
+    const y=monthlyKeys[i].split('-')[0];
+    if(!map[y])map[y]=[];
+    if(vals[i]!=null)map[y].push(vals[i]);
+  });
+  const yrs=Object.keys(map).sort();
+  return{labels:yrs,data:yrs.map(y=>useSum?sum(map[y]):avg(map[y]))};
+}
+function getCD(vals,idxs,useSum=false){
+  if(state.gran==='anual'){const r=aggAnnual(vals,idxs,useSum);return r;}
+  return{labels:idxs.map(i=>fmtM(monthlyKeys[i])),data:idxs.map(i=>vals[i])};
+}
+function deltaClass(v){return v>0?'pos':v<0?'neg':'neu';}
+function deltaPct(a,b){if(a==null||b==null||a===0)return null;return((b-a)/Math.abs(a))*100;}
+
+// ══════════════════ CHART SETUP ══════════════════
+const C=['#2563eb','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316'];
+Chart.defaults.color='#64748b';
+Chart.defaults.borderColor='rgba(255,255,255,0.07)';
+Chart.defaults.font={family:'Segoe UI,system-ui,sans-serif',size:11};
+const TTP={backgroundColor:'#1e2235',borderColor:'#2d3148',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8',padding:10,cornerRadius:6};
+const GRD={color:'rgba(255,255,255,0.05)'};
+const TCK={color:'#64748b'};
+function ax(opts={}){return{grid:GRD,ticks:{...TCK,...(opts.ticks||{})},title:{color:'#64748b',...(opts.title||{})},...opts};}
+function lineDS(label,data,color,fill=false,yAxis='y'){
+  return{label,data,borderColor:color,backgroundColor:fill?color+'22':'transparent',fill,tension:0.4,pointRadius:2,pointHoverRadius:5,borderWidth:2,yAxisID:yAxis};
+}
+function barDS(label,data,color){
+  return{label,data,backgroundColor:color+'cc',borderColor:color,borderWidth:1,borderRadius:3,yAxisID:'y'};
+}
+const charts={};
+function mkChart(id,cfg){
+  const el=document.getElementById(id);
+  if(!el)return null;
+  if(charts[id])charts[id].destroy();
+  charts[id]=new Chart(el,cfg);
+  return charts[id];
+}
+
+// ══════════════════ KPI ══════════════════
+function setKPIs(id,items){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.innerHTML=items.map(k=>`<div class="kpi-card"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div>${k.sub!=null?`<div class="kpi-delta ${k.cls||'neu'}">${k.sub}</div>`:''}</div>`).join('');
+}
+
+// ══════════════════ RENDER FUNCTIONS ══════════════════
+
+function renderOverview(){
+  const idxs=getIdxs(); if(!idxs.length)return;
+  const li=idxs[idxs.length-1], pi=idxs.length>1?idxs[idxs.length-2]:null;
+  const d1=pi!=null?deltaPct(mOcc[pi],mOcc[li]):null;
+  const d2=pi!=null?deltaPct(mRev[pi],mRev[li]):null;
+  const d3=pi!=null?deltaPct(copRevAvg[pi],copRevAvg[li]):null;
+  const d4=pi!=null?deltaPct(copRateAvg[pi],copRateAvg[li]):null;
+  const fmtD=d=>d==null?'–':(d>=0?'+':'')+d.toFixed(1)+'% vs anterior';
+  setKPIs('kpi-overview',[
+    {label:'Ocupação (último)',value:fmtPct(mOcc[li]),sub:fmtD(d1),cls:deltaClass(d1||0)},
+    {label:'RevPAR (último)',value:fmtBRL(mRev[li],2),sub:fmtD(d2),cls:deltaClass(d2||0)},
+    {label:'Receita Média · Copa',value:fmtBRL(copRevAvg[li],0),sub:fmtD(d3),cls:deltaClass(d3||0)},
+    {label:'Tarifa Diária · Copa',value:fmtBRL(copRateAvg[li],0),sub:fmtD(d4),cls:deltaClass(d4||0)},
+    {label:'Média Ocupação',value:fmtPct(avg(idxs.map(i=>mOcc[i]))),sub:'período selecionado'},
+    {label:'Média RevPAR',value:fmtBRL(avg(idxs.map(i=>mRev[i])),2),sub:'período selecionado'},
+  ]);
+  const rD=getCD(mRev,idxs), oD=getCD(mOcc,idxs);
+  mkChart('ch-overview-main',{type:'line',data:{labels:rD.labels,datasets:[
+    lineDS('RevPAR (R$)',rD.data,C[0],true),
+    lineDS('Ocupação (%)',oD.data,C[1],false,'y1'),
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>ctx.dataset.yAxisID==='y1'?'Ocup.: '+fmtPct(ctx.raw):'RevPAR: '+fmtBRL(ctx.raw,0)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{
+    x:ax({ticks:{maxRotation:45}}),
+    y:{...ax(),position:'left',title:{display:true,text:'RevPAR (R$)',color:'#64748b'}},
+    y1:{...ax(),position:'right',grid:{drawOnChartArea:false},max:100,title:{display:true,text:'Ocupação (%)',color:'#64748b'},ticks:{...TCK,callback:v=>v+'%'}},
+  }}});
+  const dD=getCD(mDem,idxs,true);
+  mkChart('ch-overview-demand',{type:'bar',data:{labels:dD.labels,datasets:[barDS('Listing-dias Reservados',dD.data,C[2])]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>'Demanda: '+fmtNum(ctx.raw)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:ax({ticks:{maxRotation:45}}),y:ax()}}});
+}
+
+function renderListings(){
+  const idxs=getIdxs(); if(!idxs.length)return;
+  const li=idxs[idxs.length-1];
+  const losValid=idxs.filter(i=>mLos[i]!=null);
+  const losLast=mLos[li];
+  setKPIs('kpi-listings',[
+    {label:'Anúncios Reservados (último)',value:fmtNum(mLst[li]),sub:''},
+    {label:'Média do Período',value:fmtNum(Math.round(avg(idxs.map(i=>mLst[i])))),sub:'anúncios/mês'},
+    {label:'Permanência Média',value:losLast!=null?losLast.toFixed(2)+' noites':'N/D',sub:'último mês disponível'},
+    {label:'Demanda Total',value:fmtNum(sum(idxs.map(i=>mDem[i]))),sub:'listing-dias reservados'},
+  ]);
+  const lstD=getCD(mLst,idxs);
+  mkChart('ch-lst-trend',{type:'line',data:{labels:lstD.labels,datasets:[lineDS('Anúncios Reservados',lstD.data,C[0],true)]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>'Anúncios: '+fmtNum(ctx.raw)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:ax({ticks:{maxRotation:45}}),y:ax()}}});
+  const b1=getCD(mBed1,idxs),b2=getCD(mBed2,idxs),b3=getCD(mBed3,idxs),b4=getCD(mBed4,idxs);
+  mkChart('ch-lst-bed',{type:'bar',data:{labels:b1.labels,datasets:[barDS('1 Quarto',b1.data,C[0]),barDS('2 Quartos',b2.data,C[1]),barDS('3 Quartos',b3.data,C[2]),barDS('4+ Quartos',b4.data,C[3])]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:{...ax({ticks:{maxRotation:45}}),stacked:true},y:{...ax(),stacked:true}}}});
+  if(losValid.length>0){
+    const losD=getCD(mLos,losValid);
+    mkChart('ch-lst-los',{type:'line',data:{labels:losD.labels,datasets:[lineDS('Permanência (noites)',losD.data,C[4],true)]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>ctx.raw!=null?ctx.raw.toFixed(2)+' noites':'–'}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:ax({ticks:{maxRotation:45}}),y:{...ax(),suggestedMin:4,suggestedMax:8}}}});
+  }
+  const advLbls=advKeys.map(fmtM);
+  mkChart('ch-lst-adv',{type:'bar',data:{labels:advLbls,datasets:[barDS('0–6 dias',adv06,C[0]),barDS('7–14 dias',adv714,C[1]),barDS('15–30 dias',adv1530,C[2]),barDS('31–60 dias',adv3160,C[3]),barDS('61–90 dias',adv6190,C[4]),barDS('91+ dias',adv91p,C[5])]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:{...ax({ticks:{maxRotation:45}}),stacked:true},y:{...ax(),stacked:true}}}});
+}
+
+function renderOccupancy(){
+  const idxs=getIdxs(); if(!idxs.length)return;
+  const li=idxs[idxs.length-1];
+  const reg=REGIONS[activeRegion];
+  const strData=reg.str, hotelData=reg.hotel;
+  const occVals=idxs.map(i=>strData[i]).filter(v=>v!=null);
+  const maxV=Math.max(...occVals), minV=Math.min(...occVals);
+  const peakI=idxs[idxs.map(i=>strData[i]).indexOf(maxV)];
+  setKPIs('kpi-occupancy',[
+    {label:'Ocupação STR (último mês)',value:fmtPct(strData[li]),sub:reg.label},
+    {label:'Média do Período',value:fmtPct(avg(idxs.map(i=>strData[i]))),sub:''},
+    {label:'Pico do Período',value:fmtPct(maxV),sub:peakI!=null?fmtM(monthlyKeys[peakI]):''},
+    {label:'Mínimo do Período',value:fmtPct(minV),sub:''},
+  ]);
+  const oD=getCD(strData,idxs);
+  mkChart('ch-occ-trend',{type:'line',data:{labels:oD.labels,datasets:[lineDS('Ocupação STR (%)',oD.data,C[0],true)]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>fmtPct(ctx.raw)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:ax({ticks:{maxRotation:45}}),y:{...ax(),max:100,ticks:{...TCK,callback:v=>v+'%'}}}}});
+  // Pace de reservas (sempre cidade, dados AirDNA globais)
+  const futLbls=futOccDates.map(d=>{const[,m,day]=d.split('-');return MNAMES_PT[+m-1]+'/'+day;});
+  mkChart('ch-occ-future',{type:'bar',data:{labels:futLbls,datasets:[barDS('Últ. 30 dias',futOccLast30,C[2]),barDS('Últ. 7 dias',futOccLast7,C[0])]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:ax({ticks:{maxRotation:45,maxTicksLimit:15}}),y:ax()}}});
+
+  // ── Comparativo Hotelaria vs STR ──────────────────────────
+  const allIdxs=monthlyKeys.map((_,i)=>i);
+  const validHIdxs=allIdxs.filter(i=>hotelData[i]!=null);
+  if(state.gran==='anual'){
+    const hAnn=aggAnnual(hotelData,validHIdxs);
+    const sAnn=aggAnnual(strData,idxs);
+    const allYrs=[...new Set([...hAnn.labels,...sAnn.labels])].sort();
+    const hVals=allYrs.map(y=>{const i=hAnn.labels.indexOf(y);return i>=0?hAnn.data[i]:null;});
+    const sVals=allYrs.map(y=>{const i=sAnn.labels.indexOf(y);return i>=0?sAnn.data[i]:null;});
+    mkChart('ch-occ-comp',{type:'bar',data:{labels:allYrs,datasets:[
+      {label:'Hotelaria Formal',data:hVals,backgroundColor:'#10b98188',borderColor:'#10b981',borderWidth:1,borderRadius:3},
+      {label:'STR (AirDNA)',data:sVals,backgroundColor:C[0]+'88',borderColor:C[0],borderWidth:1,borderRadius:3},
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{tooltip:{...TTP,callbacks:{label:ctx=>ctx.dataset.label+': '+fmtPct(ctx.raw)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},
+      scales:{x:ax(),y:{...ax(),max:100,ticks:{...TCK,callback:v=>v+'%'}}}}});
+  } else {
+    const compLabels=idxs.map(i=>fmtM(monthlyKeys[i]));
+    mkChart('ch-occ-comp',{type:'line',data:{labels:compLabels,datasets:[
+      lineDS('Hotelaria Formal (HotéisRIO)',idxs.map(i=>hotelData[i]),'#10b981',false),
+      lineDS('STR (AirDNA)',idxs.map(i=>strData[i]),C[0],false),
+    ]},options:{responsive:true,maintainAspectRatio:false,
+      plugins:{tooltip:{...TTP,callbacks:{label:ctx=>ctx.dataset.label+': '+fmtPct(ctx.raw)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},
+      scales:{x:ax({ticks:{maxRotation:45}}),y:{...ax(),max:100,ticks:{...TCK,callback:v=>v+'%'}}}}});
+  }
+
+  // ── Barras anuais — todos os anos disponíveis ──────────────
+  const hAnnAll=aggAnnual(hotelData,validHIdxs);
+  const sAnnAll=aggAnnual(strData,allIdxs);
+  const allYrs2=[...new Set([...hAnnAll.labels,...sAnnAll.labels])].sort();
+  mkChart('ch-occ-annual',{type:'bar',data:{labels:allYrs2,datasets:[
+    {label:'Hotelaria Formal',data:allYrs2.map(y=>{const i=hAnnAll.labels.indexOf(y);return i>=0?hAnnAll.data[i]:null;}),backgroundColor:'#10b98188',borderColor:'#10b981',borderWidth:1,borderRadius:3},
+    {label:'STR (AirDNA)',data:allYrs2.map(y=>{const i=sAnnAll.labels.indexOf(y);return i>=0?sAnnAll.data[i]:null;}),backgroundColor:C[0]+'88',borderColor:C[0],borderWidth:1,borderRadius:3},
+  ]},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{tooltip:{...TTP,callbacks:{label:ctx=>ctx.dataset.label+': '+fmtPct(ctx.raw)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},
+    scales:{x:ax(),y:{...ax(),max:100,ticks:{...TCK,callback:v=>v+'%'}}}
+  }});
+}
+
+function renderRevenue(){
+  const idxs=getIdxs(); if(!idxs.length)return;
+  const li=idxs[idxs.length-1];
+  const lk=monthlyKeys[li];
+  const lyI=monthlyKeys.indexOf((+lk.split('-')[0]-1)+'-'+lk.split('-')[1]);
+  const delta=lyI>=0?deltaPct(copRevAvg[lyI],copRevAvg[li]):null;
+  setKPIs('kpi-revenue',[
+    {label:'Receita Média (último mês)',value:fmtBRL(copRevAvg[li],0),sub:''},
+    {label:'vs. mesmo mês ano ant.',value:delta!=null?(delta>=0?'+':'')+delta.toFixed(1)+'%':'–',cls:delta!=null?deltaClass(delta):'neu',sub:''},
+    {label:'Média do Período',value:fmtBRL(avg(idxs.map(i=>copRevAvg[i])),0),sub:''},
+    {label:'Mediana P50 (último)',value:fmtBRL(copRevP50[li],0),sub:''},
+  ]);
+  const rD=getCD(copRevAvg,idxs);
+  mkChart('ch-rev-avg',{type:'line',data:{labels:rD.labels,datasets:[lineDS('Receita Média (R$)',rD.data,C[0],true)]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>fmtBRL(ctx.raw,0)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:ax({ticks:{maxRotation:45}}),y:ax()}}});
+  const rb1=getCD(copRevB1,idxs),rb2=getCD(copRevB2,idxs),rb3=getCD(copRevB3,idxs),rb4=getCD(copRevB4,idxs);
+  mkChart('ch-rev-bed',{type:'line',data:{labels:rb1.labels,datasets:[lineDS('1 Quarto',rb1.data,C[0]),lineDS('2 Quartos',rb2.data,C[1]),lineDS('3 Quartos',rb3.data,C[2]),lineDS('4 Quartos',rb4.data,C[3])]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>ctx.dataset.label+': '+fmtBRL(ctx.raw,0)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:ax({ticks:{maxRotation:45}}),y:ax()}}});
+  const p25D=getCD(copRevP25,idxs),p50D=getCD(copRevP50,idxs),p75D=getCD(copRevP75,idxs),p90D=getCD(copRevP90,idxs);
+  mkChart('ch-rev-pct',{type:'line',data:{labels:p25D.labels,datasets:[lineDS('P90',p90D.data,C[3]),lineDS('P75',p75D.data,C[2]),lineDS('P50 (mediana)',p50D.data,C[0],true),lineDS('P25',p25D.data,C[1])]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>ctx.dataset.label+': '+fmtBRL(ctx.raw,0)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:ax({ticks:{maxRotation:45}}),y:ax()}}});
+}
+
+function renderRates(){
+  const idxs=getIdxs(); if(!idxs.length)return;
+  const li=idxs[idxs.length-1];
+  const lk=monthlyKeys[li];
+  const lyI=monthlyKeys.indexOf((+lk.split('-')[0]-1)+'-'+lk.split('-')[1]);
+  const delta=lyI>=0?deltaPct(copRateAvg[lyI],copRateAvg[li]):null;
+  setKPIs('kpi-rates',[
+    {label:'Tarifa Diária Média (último)',value:fmtBRL(copRateAvg[li],0),sub:''},
+    {label:'vs. mesmo mês ano ant.',value:delta!=null?(delta>=0?'+':'')+delta.toFixed(1)+'%':'–',cls:delta!=null?deltaClass(delta):'neu',sub:''},
+    {label:'Média do Período',value:fmtBRL(avg(idxs.map(i=>copRateAvg[i])),0),sub:''},
+    {label:'Tarifa Luxury (último)',value:fmtBRL(copRateLuxury[li],0),sub:''},
+  ]);
+  const rD=getCD(copRateAvg,idxs);
+  mkChart('ch-rate-avg',{type:'line',data:{labels:rD.labels,datasets:[lineDS('Tarifa Média (R$)',rD.data,C[0],true)]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>fmtBRL(ctx.raw,0)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:ax({ticks:{maxRotation:45}}),y:ax()}}});
+  const tB=getCD(copRateBudget,idxs),tE=getCD(copRateEconomy,idxs),tM=getCD(copRateMid,idxs),tU=getCD(copRateUpscale,idxs),tL=getCD(copRateLuxury,idxs);
+  mkChart('ch-rate-tier',{type:'line',data:{labels:tB.labels,datasets:[lineDS('Budget',tB.data,C[1]),lineDS('Economy',tE.data,C[2]),lineDS('Midscale',tM.data,C[0]),lineDS('Upscale',tU.data,C[4]),lineDS('Luxury',tL.data,C[3])]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>ctx.dataset.label+': '+fmtBRL(ctx.raw,0)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:ax({ticks:{maxRotation:45}}),y:ax()}}});
+  const rb1=getCD(copRateB1,idxs),rb2=getCD(copRateB2,idxs),rb3=getCD(copRateB3,idxs),rb4=getCD(copRateB4,idxs);
+  mkChart('ch-rate-bed',{type:'line',data:{labels:rb1.labels,datasets:[lineDS('1 Quarto',rb1.data,C[0]),lineDS('2 Quartos',rb2.data,C[1]),lineDS('3 Quartos',rb3.data,C[2]),lineDS('4 Quartos',rb4.data,C[3])]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>ctx.dataset.label+': '+fmtBRL(ctx.raw,0)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:ax({ticks:{maxRotation:45}}),y:ax()}}});
+  // Daily history — NOT filtered by period state
+  mkChart('ch-rate-daily',{type:'line',data:{labels:dRateDates,datasets:[lineDS('Tarifa Diária (R$)',dRateVals,C[5],true)]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>'Tarifa: '+fmtBRL(ctx.raw,0)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{x:ax({ticks:{maxRotation:45,maxTicksLimit:14}}),y:ax()}}});
+  // Future forecast
+  mkChart('ch-rate-future',{type:'line',data:{labels:futDates,datasets:[lineDS('Tarifa Prevista (R$)',futRateVals,C[0],true,'y'),lineDS('Anúncios Reservados',futListings,C[2],false,'y1')]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{...TTP,callbacks:{label:ctx=>ctx.dataset.yAxisID==='y1'?'Anúncios: '+fmtNum(ctx.raw):'Tarifa: '+fmtBRL(ctx.raw,2)}},legend:{position:'bottom',labels:{color:'#94a3b8'}}},scales:{
+    x:ax({ticks:{maxRotation:45,maxTicksLimit:18}}),
+    y:{...ax(),position:'left',title:{display:true,text:'Tarifa (R$)',color:'#64748b'}},
+    y1:{...ax(),position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'Anúncios',color:'#64748b'}},
+  }}});
+}
+
+function renderSeasonality(){
+  const YEARS=['2023','2024','2025','2026'];
+  const map=(arr)=>{
+    const m={};
+    monthlyKeys.forEach((k,i)=>{const[y,mo]=k.split('-');if(!m[y])m[y]={};m[y][mo]=arr[i];});
+    return m;
+  };
+  function buildTbl(id,arr,fmtFn){
+    const tbl=document.getElementById(id);if(!tbl)return;
+    const M=map(arr);
+    let h='<thead><tr><th>Mês</th>';
+    YEARS.forEach(y=>h+=`<th>${y}</th>`);
+    h+='<th>Δ 24/23</th><th>Δ 25/24</th><th>Δ 26/25</th></tr></thead><tbody>';
+    for(let m=1;m<=12;m++){
+      const mm=String(m).padStart(2,'0');
+      const vals=YEARS.map(y=>M[y]&&M[y][mm]!=null?M[y][mm]:null);
+      const deltas=[0,1,2].map(k=>vals[k]!=null&&vals[k+1]!=null?deltaPct(vals[k],vals[k+1]):null);
+      h+=`<tr><td>${MNAMES_PT[m-1]}</td>`;
+      vals.forEach(v=>h+=`<td>${v!=null?fmtFn(v):'–'}</td>`);
+      deltas.forEach(d=>{
+        if(d==null){h+='<td class="dn0">–</td>';return;}
+        const cls=d>0.05?'dp':d<-0.05?'dn':'dn0';
+        h+=`<td><span class="${cls}">${d>=0?'+':''}${d.toFixed(1)}%</span></td>`;
+      });
+      h+='</tr>';
+    }
+    h+='</tbody>';
+    tbl.innerHTML=h;
+  }
+  buildTbl('tbl-occ',mOcc,fmtPct);
+  buildTbl('tbl-rev',mRev,v=>fmtBRL(v,0));
+  buildTbl('tbl-coprev',copRevAvg,v=>fmtBRL(v,0));
+  buildTbl('tbl-coprate',copRateAvg,v=>fmtBRL(v,0));
+
+  // ── Tabela Comparativa Hotelaria vs STR (por região selecionada) ──────────
+  (function(){
+    const reg=REGIONS[activeRegion];
+    const titleEl=document.getElementById('tbl-hotelvsstr-title');
+    if(titleEl)titleEl.textContent='Comparativo de Ocupação — Hotelaria Formal (%) vs STR AirDNA (%) · '+reg.label;
+    const YEARS=['2023','2024','2025','2026'];
+    const mapArr=(arr)=>{
+      const m={};
+      monthlyKeys.forEach((k,i)=>{const[y,mo]=k.split('-');if(!m[y])m[y]={};if(arr[i]!=null)m[y][mo]=arr[i];});
+      return m;
+    };
+    const mH=mapArr(reg.hotel), mS=mapArr(reg.str);
+    const tbl=document.getElementById('tbl-hotelvsstr');
+    if(!tbl)return;
+    let h='<thead><tr><th>Mês</th>';
+    YEARS.forEach(y=>{
+      h+=`<th colspan="2" style="text-align:center;border-left:1px solid #2d3148">${y}</th>`;
+    });
+    h+='</tr><tr><th></th>';
+    YEARS.forEach(()=>h+='<th style="border-left:1px solid #2d3148">🏨 Hotel</th><th>🏠 STR</th>');
+    h+='</tr></thead><tbody>';
+    for(let m=1;m<=12;m++){
+      const mm=String(m).padStart(2,'0');
+      h+=`<tr><td>${MNAMES_PT[m-1]}</td>`;
+      YEARS.forEach(y=>{
+        const hv=mH[y]&&mH[y][mm]!=null?mH[y][mm]:null;
+        const sv=mS[y]&&mS[y][mm]!=null?mS[y][mm]:null;
+        let diff='', diffCls='dn0';
+        if(hv!=null&&sv!=null){
+          const d=sv-hv;
+          diffCls=d>0?'dp':d<0?'dn':'dn0';
+          diff=` <span class="${diffCls}" style="font-size:10px">(${d>=0?'+':''}${d.toFixed(1)})</span>`;
+        }
+        h+=`<td style="border-left:1px solid #1e2235">${hv!=null?fmtPct(hv):'–'}</td>`;
+        h+=`<td>${sv!=null?fmtPct(sv)+diff:'–'}</td>`;
+      });
+      h+='</tr>';
+    }
+    // Linha de média anual
+    h+='<tr style="border-top:2px solid #2d3148"><td style="font-weight:600;color:#e2e8f0">Média Anual</td>';
+    YEARS.forEach(y=>{
+      const hvArr=Object.values(mH[y]||{});
+      const svArr=Object.values(mS[y]||{});
+      const hAvg=hvArr.length?avg(hvArr):null;
+      const sAvg=svArr.length?avg(svArr):null;
+      let diff='', diffCls='dn0';
+      if(hAvg!=null&&sAvg!=null){
+        const d=sAvg-hAvg;
+        diffCls=d>0?'dp':d<0?'dn':'dn0';
+        diff=` <span class="${diffCls}" style="font-size:10px">(${d>=0?'+':''}${d.toFixed(1)})</span>`;
+      }
+      h+=`<td style="border-left:1px solid #1e2235;font-weight:600">${hAvg!=null?fmtPct(hAvg):'–'}</td>`;
+      h+=`<td style="font-weight:600">${sAvg!=null?fmtPct(sAvg)+diff:'–'}</td>`;
+    });
+    h+='</tr></tbody>';
+    tbl.innerHTML=h;
+  })();
+}
+
+// ══════════════════ REGION FILTER ══════════════════
+const REGION_BTNS=[
+  {key:'cidade', label:'🌐 Rio de Janeiro'},
+  {key:'copa',   label:'🏖️ Leme / Copa'},
+  {key:'ipanema',label:'🌊 Ipanema / Leblon'},
+  {key:'flamengo',label:'🌿 Flamengo / Botafogo'},
+  {key:'barra',  label:'🏙️ Barra / Recreio'},
+  {key:'centro', label:'🏛️ Centro'},
+];
+function buildRegionBar(){
+  ['region-bar-occ','region-bar-sea'].forEach(cid=>{
+    const el=document.getElementById(cid); if(!el)return;
+    REGION_BTNS.forEach(({key,label})=>{
+      const btn=document.createElement('button');
+      btn.className='chip region-chip'+(key===activeRegion?' active':'');
+      btn.textContent=label; btn.dataset.region=key;
+      btn.addEventListener('click',()=>{
+        activeRegion=key;
+        document.querySelectorAll('.region-chip').forEach(b=>b.classList.toggle('active',b.dataset.region===activeRegion));
+        renderOccupancy();
+        renderSeasonality();
+      });
+      el.appendChild(btn);
+    });
+  });
+}
+
+// ══════════════════ FILTER UI ══════════════════
+function buildDropdowns(){
+  const sEl=document.getElementById('selStart'), eEl=document.getElementById('selEnd');
+  monthlyKeys.forEach(k=>{
+    [sEl,eEl].forEach(el=>{const o=new Option(fmtM(k),k);el.appendChild(o);});
+  });
+  sEl.value=state.startMonth; eEl.value=state.endMonth;
+  sEl.addEventListener('change',()=>{state.startMonth=sEl.value;state.activePreset='';updateChips();renderAll();});
+  eEl.addEventListener('change',()=>{state.endMonth=eEl.value;state.activePreset='';updateChips();renderAll();});
+}
+function buildChips(){
+  const bar=document.getElementById('presetsBar');
+  Object.entries(PRESETS).forEach(([k,p])=>{
+    const btn=document.createElement('button');
+    btn.className='chip'+(k===state.activePreset?' active':'');
+    btn.textContent=p.label; btn.dataset.key=k;
+    btn.addEventListener('click',()=>{
+      state={...state,startMonth:p.start,endMonth:p.end,season:p.season,activePreset:k};
+      document.getElementById('selStart').value=state.startMonth;
+      document.getElementById('selEnd').value=state.endMonth;
+      updateChips(); renderAll();
+    });
+    bar.appendChild(btn);
+  });
+}
+function updateChips(){document.querySelectorAll('.chip').forEach(b=>b.classList.toggle('active',b.dataset.key===state.activePreset));}
+function buildGran(){
+  document.querySelectorAll('.gran-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      state.gran=b.dataset.g;
+      document.querySelectorAll('.gran-btn').forEach(x=>x.classList.toggle('active',x.dataset.g===state.gran));
+      renderAll();
+    });
+  });
+}
+
+// ══════════════════ TABS ══════════════════
+let activeTab='overview';
+const tabRenderers={overview:renderOverview,listings:renderListings,occupancy:renderOccupancy,revenue:renderRevenue,rates:renderRates,seasonality:renderSeasonality};
+function buildTabs(){
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      activeTab=btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===activeTab));
+      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+activeTab));
+      (tabRenderers[activeTab]||function(){})();
+    });
+  });
+}
+function renderAll(){Object.values(tabRenderers).forEach(fn=>fn());}
+
+// ══════════════════ INIT ══════════════════
+buildDropdowns();
+buildChips();
+buildGran();
+buildRegionBar();
+buildTabs();
+renderAll();
+</script>
+</body>
+</html>
