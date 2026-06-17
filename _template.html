@@ -90,7 +90,16 @@
         font-size:13px;margin-bottom:18px;display:flex;gap:10px;align-items:flex-start}
   .note b{color:#7c2d12}
   .hidden{display:none}
-  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:24px}
+  footer.site{margin:34px -20px 0;background:linear-gradient(120deg,#0f1d33,#16335f);color:#fff;
+        border-top:3px solid var(--str);padding:24px 30px 26px;border-radius:18px 18px 0 0}
+  footer.site .ft-top{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;
+        border-bottom:1px solid rgba(255,255,255,.14);padding-bottom:14px;margin-bottom:14px}
+  footer.site .ft-org{font-size:14px;font-weight:700}
+  footer.site .ft-org small{display:block;font-weight:500;color:#b9c6df;font-size:12px;margin-top:2px}
+  footer.site .ft-legend{font-size:12px;color:#dce5f5;display:flex;gap:16px;flex-wrap:wrap}
+  footer.site .ft-grid{display:flex;flex-wrap:wrap;gap:22px;font-size:12px;color:#b9c6df}
+  footer.site .ft-grid b{color:#fff}
+  footer.site .ft-base{margin-top:14px;font-size:11px;color:#8aa0c4}
   .checks{display:flex;flex-wrap:wrap;gap:10px}
   .checks label{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink);
         background:#fff;border:1px solid var(--line);padding:7px 12px;border-radius:999px;cursor:pointer;text-transform:none;letter-spacing:0}
@@ -241,7 +250,21 @@
     <div><b>Sobre os dados:</b> a pesquisa de hotelaria (HotéisRIO) registra <b>somente a taxa de ocupação</b>. Diária Média (ADR) e Receita por Quarto (RevPAR) existem apenas para o Aluguel de Temporada (AirDNA) e aparecem marcados em laranja. Os dados de Temporada vão de <b>maio/2023</b> em diante; os de hotelaria começam em <b>2018</b>.</div>
   </div>
 
-  <footer id="footer"></footer>
+  <footer class="site">
+    <div class="ft-top">
+      <div class="ft-org">HotéisRIO<small>Sindicato de Hotéis e Meios de Hospedagem do Município do Rio de Janeiro</small></div>
+      <div class="ft-legend">
+        <span><span class="dot h"></span> Hotéis (rede tradicional)</span>
+        <span><span class="dot s"></span> Temporada / AirDNA</span>
+      </div>
+    </div>
+    <div class="ft-grid">
+      <div><b>Fontes:</b> pesquisa de ocupação HotéisRIO (2018–2026) · AirDNA (mai/2023–2026)</div>
+      <div><b>Cobertura:</b> 5 regiões · 20 bairros · cidade do Rio de Janeiro</div>
+      <div><b>Método:</b> agregados de Temporada ponderados pelo nº de imóveis</div>
+    </div>
+    <div class="ft-base" id="footer"></div>
+  </footer>
 </div>
 
 <script>
@@ -540,8 +563,8 @@ function renderAll(){
   renderRegChecks(); renderRegiao();
 }
 document.getElementById("footer").innerHTML=
-  `Dados consolidados em ${DATA.geradoEm} · Hotelaria: pesquisa HotéisRIO (2018–2026) · Temporada: AirDNA (mai/2023–2026). `+
-  `Agregados de região no Temporada ponderados pelo nº de imóveis reservados.`;
+  `Dados consolidados em ${DATA.geradoEm}. Documento de apoio técnico · uso institucional. `+
+  `© ${DATA.geradoEm.slice(0,4)} HotéisRIO. Indicadores sujeitos a revisão conforme atualização das fontes.`;
 renderAll();
 </script>
 </body>
