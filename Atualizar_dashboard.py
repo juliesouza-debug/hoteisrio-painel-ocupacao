@@ -179,6 +179,30 @@ inv_hotel = {
     CIDADE:   {"emp":286,"uh":31644},
 }
 
+# ---- Diária média (ADR) da HOTELARIA: trimestral, em US$, nível cidade ----
+# Convertida para R$ pela média trimestral do câmbio US$/R$ (PTAX, Banco Central).
+hotel_adr_usd = {
+    "2024-Q1":132, "2024-Q2":113, "2024-Q3":120, "2024-Q4":133,
+    "2025-Q1":141, "2025-Q2":123, "2025-Q3":135, "2025-Q4":152,
+    "2026-Q1":160, "2026-Q2":153,
+}
+ptax_q = {  # média trimestral PTAX (BCB série 1), R$ por US$
+    "2024-Q1":4.9515, "2024-Q2":5.2129, "2024-Q3":5.5454, "2024-Q4":5.8369,
+    "2025-Q1":5.8522, "2025-Q2":5.6661, "2025-Q3":5.4488, "2025-Q4":5.3955,
+    "2026-Q1":5.2591, "2026-Q2":5.0375,
+}
+def months_of_q(qk):
+    y,q = qk.split("-Q"); q=int(q)
+    return [f"{y}-{m:02d}" for m in range((q-1)*3+1,(q-1)*3+4)]
+hotel_adr_city, hotel_revpar_city = {}, {}
+for qk,usd in hotel_adr_usd.items():
+    adr_brl = round(usd*ptax_q[qk],2)
+    for m in months_of_q(qk):
+        hotel_adr_city[m] = adr_brl
+        occ = hotel_city.get(m)
+        if occ is not None:
+            hotel_revpar_city[m] = round(adr_brl*occ/100.0,2)
+
 # ============ MONTAGEM JSON ============
 def revpar(occmap, adrmap):
     out={}
@@ -192,7 +216,11 @@ data = {
     "regioes": REGIONS,
     "cidade": CIDADE,
     "bairrosPorRegiao": {rg: sorted(neigh_count[rg]) for rg in REGIONS},
-    "hotel": {"occ": {**hotel, CIDADE: hotel_city}},
+    "hotel": {
+        "occ": {**hotel, CIDADE: hotel_city},
+        "adr": {CIDADE: hotel_adr_city},
+        "revpar": {CIDADE: hotel_revpar_city},
+    },
     "str": {
         "occ": {**str_occ, CIDADE: str_occ_city},
         "adr": {**str_adr, CIDADE: str_adr_city},
@@ -201,6 +229,9 @@ data = {
         "listings": {**str_listings, CIDADE: str_listings_city},
     },
     "inventarioHotel": inv_hotel,
+    "notaHotelAdr": "Diária e RevPAR da hotelaria: dados trimestrais, nível cidade, "
+                    "convertidos de US$ para R$ pela média trimestral do câmbio (PTAX/BCB). "
+                    "Disponíveis a partir de 2024.",
 }
 
 with open(os.path.join(BASE,"_data.json"),"w",encoding="utf-8") as f:
