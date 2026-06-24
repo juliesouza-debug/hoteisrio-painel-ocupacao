@@ -186,18 +186,25 @@ hotel_adr_usd = {
     "2025-Q1":141, "2025-Q2":123, "2025-Q3":135, "2025-Q4":152,
     "2026-Q1":160, "2026-Q2":153,
 }
-ptax_q = {  # média trimestral PTAX (BCB série 1), R$ por US$
-    "2024-Q1":4.9515, "2024-Q2":5.2129, "2024-Q3":5.5454, "2024-Q4":5.8369,
-    "2025-Q1":5.8522, "2025-Q2":5.6661, "2025-Q3":5.4488, "2025-Q4":5.3955,
-    "2026-Q1":5.2591, "2026-Q2":5.0375,
+ptax_m = {  # média MENSAL do câmbio US$/R$ (PTAX, BCB série 1)
+    "2024-01":4.9144,"2024-02":4.9644,"2024-03":4.9801,"2024-04":5.1291,"2024-05":5.1330,"2024-06":5.3890,
+    "2024-07":5.5420,"2024-08":5.5526,"2024-09":5.5416,"2024-10":5.6241,"2024-11":5.8071,"2024-12":6.0970,
+    "2025-01":6.0218,"2025-02":5.7656,"2025-03":5.7468,"2025-04":5.7837,"2025-05":5.6674,"2025-06":5.5471,
+    "2025-07":5.5285,"2025-08":5.4469,"2025-09":5.3674,"2025-10":5.3855,"2025-11":5.3409,"2025-12":5.4531,
+    "2026-01":5.3380,"2026-02":5.2006,"2026-03":5.2316,"2026-04":5.0331,"2026-05":4.9837,"2026-06":5.1101,
 }
 def months_of_q(qk):
     y,q = qk.split("-Q"); q=int(q)
     return [f"{y}-{m:02d}" for m in range((q-1)*3+1,(q-1)*3+4)]
+# converte cada mês pela cotação média do PRÓPRIO mês (a diária em US$ é trimestral;
+# o valor em R$ varia mês a mês acompanhando o câmbio).
 hotel_adr_city, hotel_revpar_city = {}, {}
 for qk,usd in hotel_adr_usd.items():
-    adr_brl = round(usd*ptax_q[qk],2)
     for m in months_of_q(qk):
+        rate = ptax_m.get(m)
+        if rate is None:
+            continue
+        adr_brl = round(usd*rate,2)
         hotel_adr_city[m] = adr_brl
         occ = hotel_city.get(m)
         if occ is not None:
@@ -229,8 +236,8 @@ data = {
         "listings": {**str_listings, CIDADE: str_listings_city},
     },
     "inventarioHotel": inv_hotel,
-    "notaHotelAdr": "Diária e RevPAR da hotelaria: dados trimestrais, nível cidade, "
-                    "convertidos de US$ para R$ pela média trimestral do câmbio (PTAX/BCB). "
+    "notaHotelAdr": "Diária e RevPAR da hotelaria: diária trimestral (US$), nível cidade, "
+                    "convertida para R$ pela cotação média MENSAL do câmbio (PTAX/BCB). "
                     "Disponíveis a partir de 2024.",
 }
 

@@ -247,7 +247,7 @@
 
   <div class="note">
     <span>⚠️</span>
-    <div><b>Sobre os dados:</b> a ocupação da hotelaria (HotéisRIO) é mensal e por região, desde <b>2018</b>. A <b>Diária Média e o RevPAR da hotelaria</b> são <b>trimestrais, apenas no nível cidade, a partir de 2024</b>, e foram convertidos de <b>US$ para R$ pela média trimestral do câmbio (PTAX/BCB)</b>. Os dados de Temporada (AirDNA) são mensais, por região, de <b>maio/2023</b> em diante.</div>
+    <div><b>Sobre os dados:</b> a ocupação da hotelaria (HotéisRIO) é mensal e por região, desde <b>2018</b>. A <b>Diária Média e o RevPAR da hotelaria</b> têm origem <b>trimestral em US$, apenas no nível cidade, a partir de 2024</b>, e foram convertidos para R$ pela <b>cotação média mensal do câmbio (PTAX/BCB)</b> — por isso o valor em R$ varia mês a mês acompanhando o dólar. Os dados de Temporada (AirDNA) são mensais, por região, de <b>maio/2023</b> em diante.</div>
   </div>
 
   <footer class="site">
@@ -369,8 +369,8 @@ const friendly = {
   occS:"Quão cheios ficaram os imóveis de temporada, em média.",
   adr:"Diária Média (ADR): valor médio cobrado por noite alugada.",
   revpar:"Receita por Quarto Disponível (RevPAR): receita média por quarto, ocupado ou não. É o melhor termômetro de faturamento.",
-  adrH:"Diária média da hotelaria formal. Dado trimestral da cidade, convertido de US$ para R$ pela média do câmbio (PTAX) do trimestre.",
-  revparH:"Receita por Quarto (RevPAR) da hotelaria: diária média × taxa de ocupação. Calculado a partir do dado trimestral (cidade)."
+  adrH:"Diária média da hotelaria formal (cidade). Origem trimestral em US$, convertida para R$ pela cotação média do câmbio (PTAX) de cada mês.",
+  revparH:"Receita por Quarto (RevPAR) da hotelaria: diária média × taxa de ocupação (cidade)."
 };
 const fmtInt = v => v==null?"—":Math.round(v).toLocaleString("pt-BR");
 function renderVisao(){
@@ -388,7 +388,7 @@ function renderVisao(){
       sub:invH?`quartos (UHs) · ${fmtInt(invH.emp)} hotéis`:"sem dado",tip:friendly.invH},
     {cls:"h",label:"Ocupação média",val:fmtPct(occH),sub:"taxa de ocupação",tip:friendly.occH},
     adrH!=null
-      ? {cls:"h",label:"Diária Média (ADR)",val:fmtRS(adrH),sub:"por noite (trimestral, em R$)",tip:friendly.adrH}
+      ? {cls:"h",label:"Diária Média (ADR)",val:fmtRS(adrH),sub:"por noite (R$, câmbio do mês)",tip:friendly.adrH}
       : {cls:"h na",label:"Diária Média (ADR)",val:"Não disponível",sub:naSub},
     revH!=null
       ? {cls:"h",label:"Receita por Quarto (RevPAR)",val:fmtRS(revH),sub:"diária × ocupação (R$)",tip:friendly.revparH}
