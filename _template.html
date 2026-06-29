@@ -247,7 +247,7 @@
 
   <div class="note">
     <span>⚠️</span>
-    <div><b>Sobre os dados:</b> a ocupação da hotelaria (HotéisRIO) é mensal e por região, desde <b>2018</b>. A <b>Diária Média e o RevPAR da hotelaria</b> têm origem <b>trimestral em US$, apenas no nível cidade, a partir de 2024</b>, e foram convertidos para R$ pela <b>cotação média mensal do câmbio (PTAX/BCB)</b> — por isso o valor em R$ varia mês a mês acompanhando o dólar. Os dados de Temporada (AirDNA) são mensais, por região, de <b>maio/2023</b> em diante.</div>
+    <div><b>Sobre os dados:</b> a ocupação da hotelaria (HotéisRIO) é mensal e por região, desde <b>2018</b>. A <b>Diária Média e o RevPAR da hotelaria</b> são <b>apurados por trimestre</b> (origem em US$, nível cidade, a partir de <b>2024</b>) — dados obtidos em <b>parceria HotéisRIO + Expedia</b> — e convertidos para R$ pela <b>cotação média mensal do câmbio (PTAX/BCB)</b>. Os dados de Temporada (AirDNA) são mensais, por região, de <b>maio/2023</b> em diante.</div>
   </div>
 
   <footer class="site">
@@ -259,7 +259,7 @@
       </div>
     </div>
     <div class="ft-grid">
-      <div><b>Fontes:</b> pesquisa de ocupação HotéisRIO (2018–2026) · AirDNA (mai/2023–2026)</div>
+      <div><b>Fontes:</b> ocupação HotéisRIO (2018–2026) · diária da hotelaria: parceria HotéisRIO + Expedia (trimestral) · Temporada: AirDNA (mai/2023–2026)</div>
       <div><b>Cobertura:</b> 5 regiões · 20 bairros · cidade do Rio de Janeiro</div>
       <div><b>Método:</b> agregados de Temporada ponderados pelo nº de imóveis</div>
     </div>
@@ -369,8 +369,8 @@ const friendly = {
   occS:"Quão cheios ficaram os imóveis de temporada, em média.",
   adr:"Diária Média (ADR): valor médio cobrado por noite alugada.",
   revpar:"Receita por Quarto Disponível (RevPAR): receita média por quarto, ocupado ou não. É o melhor termômetro de faturamento.",
-  adrH:"Diária média da hotelaria formal (cidade). Origem trimestral em US$, convertida para R$ pela cotação média do câmbio (PTAX) de cada mês.",
-  revparH:"Receita por Quarto (RevPAR) da hotelaria: diária média × taxa de ocupação (cidade)."
+  adrH:"Diária média da hotelaria formal (cidade), apurada por trimestre — fonte: parceria HotéisRIO + Expedia. Origem em US$, convertida para R$ pela cotação média do câmbio (PTAX) de cada mês.",
+  revparH:"Receita por Quarto (RevPAR) da hotelaria: diária média (trimestral) × taxa de ocupação (cidade)."
 };
 const fmtInt = v => v==null?"—":Math.round(v).toLocaleString("pt-BR");
 function renderVisao(){
@@ -388,7 +388,7 @@ function renderVisao(){
       sub:invH?`quartos (UHs) · ${fmtInt(invH.emp)} hotéis`:"sem dado",tip:friendly.invH},
     {cls:"h",label:"Ocupação média",val:fmtPct(occH),sub:"taxa de ocupação",tip:friendly.occH},
     adrH!=null
-      ? {cls:"h",label:"Diária Média (ADR)",val:fmtRS(adrH),sub:"por noite (R$, câmbio do mês)",tip:friendly.adrH}
+      ? {cls:"h",label:"Diária Média (ADR)",val:fmtRS(adrH),sub:"média trimestral · em R$ (parceria Expedia)",tip:friendly.adrH}
       : {cls:"h na",label:"Diária Média (ADR)",val:"Não disponível",sub:naSub},
     revH!=null
       ? {cls:"h",label:"Receita por Quarto (RevPAR)",val:fmtRS(revH),sub:"diária × ocupação (R$)",tip:friendly.revparH}
