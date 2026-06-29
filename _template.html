@@ -170,9 +170,9 @@
       <div class="field">
         <label>Indicador</label>
         <select id="anos-metric">
-          <option value="occ">Taxa de Ocupação (%)</option>
-          <option value="adr">Diária Média / ADR (R$) — só Temporada</option>
-          <option value="revpar">Receita por quarto / RevPAR (R$) — só Temporada</option>
+          <option value="occ">Taxa de Ocupação (%) — mensal</option>
+          <option value="adr">Diária Média / ADR (R$) — por trimestre</option>
+          <option value="revpar">Receita por quarto / RevPAR (R$) — por trimestre</option>
         </select>
       </div>
       <div class="field">
@@ -194,7 +194,7 @@
     </div>
     <div class="panel">
       <h2 id="anos-title">Comparação mês a mês entre anos</h2>
-      <p class="desc">Cada barra é um mês; cada cor é um ano. Útil para ver se o desempenho de um mês melhorou ou piorou de um ano para o outro.</p>
+      <p class="desc" id="anos-desc">Cada barra é um mês; cada cor é um ano. Útil para ver se o desempenho de um mês melhorou ou piorou de um ano para o outro.</p>
       <div class="chart-box tall"><canvas id="chart-anos"></canvas></div>
     </div>
   </section>
@@ -451,6 +451,16 @@ function valFor(src,metric,region,y){
   return MESES.map((_,mi)=>{const k=`${y}-${String(mi+1).padStart(2,"0")}`;
     const map=(DATA[src][metric]&&DATA[src][metric][region])||{}; return (k in map)?map[k]:null;});
 }
+// média de cada trimestre (1º..4º) do ano — usada para diária/RevPAR (dados trimestrais)
+const TRIMESTRES=["1º trimestre","2º trimestre","3º trimestre","4º trimestre"];
+function quarterAvgs(src,metric,region,y){
+  const map=(DATA[src][metric]&&DATA[src][metric][region])||{};
+  return [0,1,2,3].map(q=>{
+    const vals=[];
+    for(let m=1;m<=3;m++){const k=`${y}-${String(q*3+m).padStart(2,"0")}`; if(k in map && map[k]!=null) vals.push(map[k]);}
+    return vals.length? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*100)/100 : null;
+  });
+}
 function renderAnos(){
   const metric=document.getElementById("anos-metric").value;
   let fonte=document.getElementById("anos-fonte").value;
@@ -458,6 +468,7 @@ function renderAnos(){
   const fonteSel=document.getElementById("anos-fonte");
   fonteSel.disabled = false;  // hotel agora tem diária/RevPAR (cidade), além de ocupação
   const isPct = metric==="occ";
+  const porTri = (metric!=="occ");   // diária/RevPAR: comparar por trimestre
   const sources = (fonte==="ambos") ? ["hotel","str"] : [fonte];
   const dual = sources.length>1;
   const datasets=[];
@@ -467,16 +478,19 @@ function renderAnos(){
       const color = dual ? (isH?BLUES[i%3]:ORANGES[i%3]) : YEAR_PALETTE[i%YEAR_PALETTE.length];
       datasets.push({
         label: dual ? `${isH?"Hotéis":"Temporada"} ${y}` : `${y}`,
-        data: valFor(s,metric,region,y),
-        backgroundColor:color, borderRadius:5, maxBarThickness:34,
+        data: porTri ? quarterAvgs(s,metric,region,y) : valFor(s,metric,region,y),
+        backgroundColor:color, borderRadius:5, maxBarThickness:porTri?60:34,
       });
     });
   });
   const mName={occ:"Taxa de Ocupação",adr:"Diária Média (ADR)",revpar:"Receita por Quarto (RevPAR)"}[metric];
   const sName = dual ? "Hotéis × Temporada" : (fonte==="hotel"?"Hotéis":"Temporada");
   document.getElementById("anos-title").textContent=`${mName} · ${sName} · ${region}`;
+  document.getElementById("anos-desc").textContent = porTri
+    ? "Cada barra é um trimestre; cada cor é um ano. A diária média é apurada por trimestre — média dos meses convertidos em R$."
+    : "Cada barra é um mês; cada cor é um ano. Útil para ver se o desempenho de um mês melhorou ou piorou de um ano para o outro.";
   draw("chart-anos",{type:"bar",
-    data:{labels:MESES_FULL,datasets},
+    data:{labels:porTri?TRIMESTRES:MESES_FULL,datasets},
     options:baseOpts(isPct?"%":"R$",v=>isPct?v+"%":"R$"+v,
       ctx=>`${ctx.dataset.label}: ${isPct?fmtPct(ctx.parsed.y):fmtRS(ctx.parsed.y)}`)
   });
