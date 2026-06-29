@@ -188,7 +188,7 @@
         </select>
       </div>
       <div class="field">
-        <label>Anos a comparar (até 3)</label>
+        <label>Anos a comparar (até 4)</label>
         <div class="checks" id="anos-years"></div>
       </div>
     </div>
@@ -215,6 +215,7 @@
         </select>
       </div>
       <div class="filter-note">📅 Usa o mesmo período definido na aba <b>Visão Geral</b> (atual: <span id="evo-periodo"></span>).</div>
+      <div class="filter-note" id="evo-hint" style="color:#c2410c"></div>
     </div>
     <div class="panel">
       <h2>Tendência e sazonalidade ao longo do tempo</h2>
@@ -240,7 +241,7 @@
     <div class="panel">
       <h2>Relação Ocupação × Diária — imóveis de Temporada</h2>
       <p class="desc">Cada bolha é uma região. Quanto mais à direita, mais cheia; quanto mais alta, mais cara a diária. O tamanho da bolha representa a receita por quarto disponível (RevPAR).
-        <span class="help" title="Os hotéis não aparecem aqui porque a fonte de dados de hotelaria não informa diária média.">i</span></p>
+        <span class="help" title="Os hotéis não aparecem aqui porque a diária da hotelaria existe apenas no total da cidade, sem quebra por região.">i</span></p>
       <div class="chart-box"><canvas id="chart-reg-scatter"></canvas></div>
     </div>
   </section>
@@ -425,7 +426,8 @@ function renderVisao(){
 }
 
 /* ============ ANO A ANO ============ */
-let selectedYears=["2023","2024","2025"];
+let selectedYears=["2023","2024","2025","2026"];
+const MAX_ANOS=4;
 function availableYears(source){
   const srcs = source==="ambos" ? ["hotel","str"] : [source];
   const s=new Set();
@@ -439,17 +441,17 @@ function renderYearChecks(){
   const fonte=document.getElementById("anos-fonte").value;
   const yrs=availableYears(fonte);
   selectedYears=selectedYears.filter(y=>yrs.includes(y));
-  if(!selectedYears.length) selectedYears=yrs.slice(-3);
+  if(!selectedYears.length) selectedYears=yrs.slice(-MAX_ANOS);
   const wrap=document.getElementById("anos-years");
   wrap.innerHTML=yrs.map(y=>`<label><input type="checkbox" value="${y}" ${selectedYears.includes(y)?"checked":""}> ${y}</label>`).join("");
   wrap.querySelectorAll("input").forEach(cb=>cb.onchange=()=>{
-    if(cb.checked){ if(selectedYears.length>=3){cb.checked=false;return;} selectedYears.push(cb.value);}
+    if(cb.checked){ if(selectedYears.length>=MAX_ANOS){cb.checked=false;return;} selectedYears.push(cb.value);}
     else selectedYears=selectedYears.filter(y=>y!==cb.value);
     selectedYears.sort(); renderAnos();
   });
 }
-const BLUES=["#93b4fb","#3b82f6","#1d4ed8"];   // tons de azul por ano (Hotéis)
-const ORANGES=["#fdba74","#f97316","#c2410c"]; // tons de laranja por ano (Temporada)
+const BLUES=["#a8c4fb","#5b8df5","#2563eb","#16348f"];   // tons de azul por ano (Hotéis)
+const ORANGES=["#fdc89a","#fb9a4b","#f2730f","#b8430a"]; // tons de laranja por ano (Temporada)
 function valFor(src,metric,region,y){
   return MESES.map((_,mi)=>{const k=`${y}-${String(mi+1).padStart(2,"0")}`;
     const map=(DATA[src][metric]&&DATA[src][metric][region])||{}; return (k in map)?map[k]:null;});
@@ -478,7 +480,7 @@ function renderAnos(){
   selectedYears.forEach((y,i)=>{
     sources.forEach(s=>{
       const isH = s==="hotel";
-      const color = dual ? (isH?BLUES[i%3]:ORANGES[i%3]) : YEAR_PALETTE[i%YEAR_PALETTE.length];
+      const color = dual ? (isH?BLUES[i%BLUES.length]:ORANGES[i%ORANGES.length]) : YEAR_PALETTE[i%YEAR_PALETTE.length];
       datasets.push({
         label: dual ? `${isH?"Hotéis":"Temporada"} ${y}` : `${y}`,
         data: porTri ? quarterAvgs(s,metric,region,y) : valFor(s,metric,region,y),
@@ -523,6 +525,11 @@ function renderEvo(){
         pointHoverRadius:5,borderWidth:2.5,fill:false});
     }
   }
+  // aviso: diária/RevPAR do hotel só existe no total da cidade
+  const hint=document.getElementById("evo-hint");
+  if(metric!=="occ" && r!==DATA.cidade){
+    hint.textContent="ℹ️ A diária/RevPAR do hotel só existe no total da cidade. Selecione “Rio de Janeiro (cidade)” para ver a linha azul dos hotéis.";
+  } else { hint.textContent=""; }
   const isPct=metric==="occ";
   draw("chart-evo",{type:"line",data:{labels,datasets},
     options:baseOpts(isPct?"Ocupação (%)":"R$",v=>isPct?v+"%":"R$"+v,
