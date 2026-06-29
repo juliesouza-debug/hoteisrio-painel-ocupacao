@@ -236,9 +236,9 @@ data = {
         "listings": {**str_listings, CIDADE: str_listings_city},
     },
     "inventarioHotel": inv_hotel,
-    "notaHotelAdr": "Diária e RevPAR da hotelaria: diária trimestral (US$), nível cidade, "
-                    "convertida para R$ pela cotação média MENSAL do câmbio (PTAX/BCB). "
-                    "Disponíveis a partir de 2024.",
+    "notaHotelAdr": "Diária e RevPAR da hotelaria: diária apurada por TRIMESTRE (US$), nível cidade, "
+                    "obtida em parceria HotéisRIO + Expedia, convertida para R$ pela cotação média "
+                    "MENSAL do câmbio (PTAX/BCB). Disponíveis a partir de 2024.",
 }
 
 with open(os.path.join(BASE,"_data.json"),"w",encoding="utf-8") as f:
