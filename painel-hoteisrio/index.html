@@ -281,12 +281,14 @@ const fmtPct = v => v==null?"—":v.toFixed(1).replace(".",",")+"%";
 const fmtRS  = v => v==null?"—":"R$ "+Math.round(v).toLocaleString("pt-BR");
 const keyToLabel = k => { const [y,m]=k.split("-"); return MESES[+m-1]+"/"+y.slice(2); };
 
-// universo de meses (união hotel+str ordenada)
+// universo de meses (união de TODAS as métricas: ocupação, diária, RevPAR, imóveis)
 function allMonthKeys(){
   const s=new Set();
-  for(const r of allRegions){
-    Object.keys(DATA.hotel.occ[r]||{}).forEach(k=>s.add(k));
-    Object.keys(DATA.str.occ[r]||{}).forEach(k=>s.add(k));
+  for(const src of [DATA.hotel, DATA.str]){
+    for(const metric in src){
+      const byRegion=src[metric]||{};
+      for(const r in byRegion) Object.keys(byRegion[r]||{}).forEach(k=>s.add(k));
+    }
   }
   return [...s].sort();
 }
@@ -294,8 +296,8 @@ const MONTHS = allMonthKeys();
 const MIN_MONTH = MONTHS[0], MAX_MONTH = MONTHS[MONTHS.length-1];
 const STR_MIN = "2023-05";
 
-// estado global (período compartilhado)
-const state = { de:"2023-01", ate:"2025-12", regiaoVisao:DATA.cidade };
+// estado global (período compartilhado) — vai até o mês mais recente disponível (inclui 2026)
+const state = { de:"2023-01", ate:MAX_MONTH, regiaoVisao:DATA.cidade };
 // ajusta default ao range existente
 if(state.de < MIN_MONTH) state.de = MIN_MONTH;
 if(state.ate > MAX_MONTH) state.ate = MAX_MONTH;
@@ -326,7 +328,8 @@ gDe.min=MIN_MONTH; gDe.max=MAX_MONTH; gAte.min=MIN_MONTH; gAte.max=MAX_MONTH;
 gDe.value=state.de; gAte.value=state.ate;
 
 const PRESETS=[
-  {l:"Últimos 3 anos (2023–25)",de:"2023-01",ate:"2025-12"},
+  {l:"2023 → atual",de:"2023-01",ate:MAX_MONTH},
+  {l:"2026",de:"2026-01",ate:MAX_MONTH},
   {l:"2025",de:"2025-01",ate:"2025-12"},
   {l:"2024",de:"2024-01",ate:"2024-12"},
   {l:"Só período com Temporada",de:STR_MIN,ate:MAX_MONTH},
@@ -512,11 +515,12 @@ function renderEvo(){
     const nome=metric==="adr"?"Diária Média":"Receita por Quarto";
     datasets=[{label:`${nome} (Temporada)`,
       data:series("str",metric,r,mk),borderColor:COL_STR,backgroundColor:"rgba(249,115,22,.1)",
-      tension:.3,spanGaps:true,pointRadius:2,borderWidth:2.5,fill:true}];
+      tension:.3,cubicInterpolationMode:"monotone",spanGaps:true,pointRadius:2,pointHoverRadius:5,borderWidth:2.5,fill:true}];
     const hotelData=series("hotel",metric,r,mk);
     if(hotelData.some(v=>v!=null)){
       datasets.unshift({label:`${nome} (Hotéis)`,data:hotelData,borderColor:COL_HOTEL,
-        backgroundColor:"rgba(37,99,235,.06)",stepped:true,spanGaps:true,pointRadius:0,borderWidth:2.5,fill:false});
+        tension:.35,cubicInterpolationMode:"monotone",spanGaps:true,pointRadius:2,
+        pointHoverRadius:5,borderWidth:2.5,fill:false});
     }
   }
   const isPct=metric==="occ";
